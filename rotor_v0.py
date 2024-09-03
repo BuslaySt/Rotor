@@ -23,8 +23,6 @@ class MainUI(QMainWindow):
                 pass
             case 2:
                 pass
-
-
    
 if __name__ == '__main__':
     # app = QApplication(sys.argv)
