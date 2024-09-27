@@ -101,7 +101,6 @@ class MainUI(QMainWindow):
             instrument = self.instrumentLinear
             speed = int(self.Line_lEd1_Speed.text())
             direction = "F"
-            self.Motion(instrument, speed, direction)
         elif self.sender() == self.Line_pBtn2_Backward:
             instrument = self.instrumentLinear
             speed = int(self.Line_lEd1_Speed.text())
@@ -111,7 +110,6 @@ class MainUI(QMainWindow):
             instrument = self.instrumentRotor
             speed = int(self.Rtr_lEd1_Speed.text())
             direction = "F"
-            self.Motion(instrument, speed, direction)
         elif self.sender() == self.Rtr_pBtn2_Backward:
             instrument = self.instrumentRotor
             speed = int(self.Rtr_lEd1_Speed.text())
@@ -121,13 +119,28 @@ class MainUI(QMainWindow):
 
     def StartStep(self) -> None:
         if self.sender() == self.Line_pBtn3_Step_Fwd:
-            instrument = self.instrumentLine
-            speed = int(Line_lEd1_Speed.text())
-            self.Motion(self.instrumentLine, int(Line_lEd1_Speed.text()), 'F')
-        elif self.sender() == self.Line_pBtn2_Backward:
             instrument = self.instrumentLinear
             speed = int(self.Line_lEd1_Speed.text())
-            self.Motion(self.instrumentLine, int(Line_lEd1_Speed.text()), 'W')
+            step = int(self.Line_lEd2_Step.text())*2
+            direction = "F"
+        elif self.sender() == self.Line_pBtn4_Step_Bkwd:
+            instrument = self.instrumentLinear
+            speed = int(self.Line_lEd1_Speed.text())
+            step = int(self.Line_lEd2_Step.text())*2
+            direction = "B"
+        
+        if self.sender() == self.Rtr_pBtn3_Step_Fwd:
+            instrument = self.instrumentRotor
+            speed = int(self.Rtr_lEd1_Speed.text())
+            step = int(self.Rtr_lEd3_Step.text())*100
+            direction = "F"
+        elif self.sender() == self.Rtr_pBtn4_Step_Bkwd:
+            instrument = self.instrumentRotor
+            speed = int(self.Rtr_lEd1_Speed.text())
+            step = int(self.Rtr_lEd3_Step.text())*100
+            direction = "B"
+        
+        self.StepSimple(instrument, speed, step, direction)
 
     def Motion(self, instrument, speed, direction) -> None:
         if direction == "F":
@@ -174,7 +187,7 @@ class MainUI(QMainWindow):
             print(message)
         # time.sleep(1)
 
-    def Step(self, instrument, speed, step, direction, precision) -> None:
+    def StepOld(self, instrument, speed, step, direction, precision) -> None:
         # self.GetData()
         # Z0 = int(self.Data_lbl08_ZData.text().split()[0])
         # Phi0 = float(self.Data_lbl14_PhiData.text().split()[0].replace('\u00B0','').replace('\\xb0','').replace(',','.'))
