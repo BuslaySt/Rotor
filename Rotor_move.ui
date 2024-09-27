@@ -140,7 +140,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>мм</string>
+      <string>градусов</string>
      </property>
     </widget>
     <widget class="QPushButton" name="Rtr_pBtn3_Step_Fwd">
