@@ -62,7 +62,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>75</string>
+      <string>1</string>
      </property>
     </widget>
     <widget class="QLabel" name="Rtr_lbl03_Step">
@@ -140,7 +140,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>градусов</string>
+      <string>°</string>
      </property>
     </widget>
     <widget class="QPushButton" name="Rtr_pBtn3_Step_Fwd">
