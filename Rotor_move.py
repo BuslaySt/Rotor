@@ -16,7 +16,6 @@ class MainUI(QMainWindow):
         self.Zcoor = self.GetData()[3]
         self.PHIcoor = self.GetData()[5]
 
-
         ''' Привязка кнопок '''
         # Движение ротора
         self.Rtr_pBtn1_Forward.pressed.connect(self.StartMotion)
@@ -92,6 +91,7 @@ class MainUI(QMainWindow):
         try:
             # Команда включения серво; 0x0405 - адрес параметра; 0x83 - значение параметра
             self.instrumentLinear.write_registers(0x00F, [1])
+            # self.instrumentLinear.write_registers(0x0007, [0x0000])
         except (IOError, AttributeError, ValueError): # minimalmodbus.serial.serialutil.SerialException:
             message = "Запуск привода линейки не удался"
             print(message)
@@ -123,30 +123,37 @@ class MainUI(QMainWindow):
             speed = int(self.Line_lEd1_Speed.text())
             step = int(self.Line_lEd2_Step.text())*2
             direction = "F"
+            precision = 5
         elif self.sender() == self.Line_pBtn4_Step_Bkwd:
             instrument = self.instrumentLinear
             speed = int(self.Line_lEd1_Speed.text())
             step = int(self.Line_lEd2_Step.text())*2
             direction = "B"
+            precision = 5
         
         if self.sender() == self.Rtr_pBtn3_Step_Fwd:
             instrument = self.instrumentRotor
             speed = int(self.Rtr_lEd1_Speed.text())
             step = int(self.Rtr_lEd3_Step.text())*100
             direction = "F"
+            precision = 5
         elif self.sender() == self.Rtr_pBtn4_Step_Bkwd:
             instrument = self.instrumentRotor
             speed = int(self.Rtr_lEd1_Speed.text())
             step = int(self.Rtr_lEd3_Step.text())*100
             direction = "B"
+            precision = 5
         
         self.StepSimple(instrument, speed, step, direction)
+        # self.StepPrecise(instrument, speed, step, direction, precision)
 
-    def Motion(self, instrument, speed, direction) -> None:
+    def Motion(self, instrument, speed, direction="F") -> None:
         if direction == "F":
-            dir = 0x0000
+            # dir = 0x0000
+            pass
         elif direction == "B":
-            dir = 0x0001
+            # dir = 0x0001
+            speed = 65525-speed
         try:
             # Формирование массива параметров для команды:
             # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
@@ -159,7 +166,7 @@ class MainUI(QMainWindow):
             # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
             message = "Движение запущено"
             print(message)
-            instrument.write_registers(0x0007, [dir]) # Ось движения прямо
+            instrument.write_registers(0x0007, [0x0000]) # Ось движения прямо
             instrument.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
@@ -229,19 +236,22 @@ class MainUI(QMainWindow):
             Z = int(self.Data_lbl08_ZData.text().split()[0])
             print(step - (Z0 - Z))
 
-    def StepPresize(self, instrument, speed, step, direction, precision) -> None:
+    def StepPrecise(self, instrument, speed, step, direction="F", precision=10) -> None:
         # Запоминаем начальную позицию
         line = self.GetData()
         Z = Z0 = line[3]
-        Phi0 = line[5]
+        PHI = PHI0 = line[5]
         if direction == "F":
             dir = 0x0000
         elif direction == "B":
             dir = 0x0001
         try:
-            move = round(step*2/3)
-            instrument.write_registers(0x0007, [dir])
-            while ((ABS(Z-Z0)-step > precision) and (ABS(PHI-PHI0)-step > precision)):
+            move = round((step-abs(PHI-PHI0)*100-(Z-Z0)*2)*2/3)
+            instrument.write_registers(0x0007, [dir]) # Выбор направления движения
+            while ((step-abs(PHI-PHI0)*100) > precision) and ((step-abs(Z-Z0)*2) > precision):
+                ic(move)
+                ic((step-(PHI-PHI0)*100) > precision)
+                ic((step-(Z-Z0)) > precision)
                 # Формирование массива параметров для команды:
                 # 0x0041 - 65 - режим однократного увеличения позиции (шаг), записывается по адресу 0x6200
                 # 0x0000 - верхние два байта кол-ва оборотов (=0 обычно), записывается по адресу 0x6201
@@ -252,7 +262,15 @@ class MainUI(QMainWindow):
                 # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
                 # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
                 instrument.write_registers(0x6200, [0x0041, 0, move, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
-                move = round(move*2/3)
+                time.sleep(2)
+                
+                line = self.GetData()
+                Z = line[3]
+                PHI = line[5]
+                ic(step-abs(PHI-PHI0)*100)
+                ic(step-abs(Z-Z0)*1)
+                move = round((step-abs(PHI-PHI0)*100-(Z-Z0)*2)*2/3)
+
         except (IOError, AttributeError, ValueError):
             message = "Команда не прошла"
             print(message)
@@ -281,6 +299,7 @@ class MainUI(QMainWindow):
             instrument = self.instrumentLinear
         try:
             instrument.write_registers(0x6002, [0x0040])
+            # instrument.write_registers(0x0007, [0x0000])
             print('Стоп!')
         except (IOError, AttributeError, ValueError):
             message = "Команда не прошла"
@@ -297,7 +316,7 @@ class MainUI(QMainWindow):
         self.Data_lbl12_ZstepData.setText(str(data[3]-self.Zcoor))
         self.Data_lbl14_PhiData.setText(str(data[5])+"°")
         self.Data_lbl16_PhiErrData.setText(str(data[6]))
-        self.Data_lbl18_PhiStepData.setText(str(data[5]-self.PHIcoor))
+        self.Data_lbl18_PhiStepData.setText(str(round((data[5]-self.PHIcoor), 3)))
         self.Data_lbl20_TData.setText(str(data[7])+" °C")
         self.Zcoor = data[3]
         self.PHIcoor = data[5]
