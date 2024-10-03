@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>379</height>
+    <width>667</width>
+    <height>424</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab_1_info">
        <attribute name="title">
@@ -340,38 +340,74 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_3_move">
+      <widget class="QWidget" name="tab_3_fast">
        <attribute name="title">
-        <string>Движение</string>
+        <string>Быстрый режим</string>
        </attribute>
-       <widget class="QPushButton" name="pushButton">
+      </widget>
+      <widget class="QWidget" name="tab_4_normal">
+       <attribute name="title">
+        <string>Нормальный режим</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab_5_precise">
+       <attribute name="title">
+        <string>Сверхточный режим</string>
+       </attribute>
+       <widget class="QPushButton" name="pBtn1_Turn">
         <property name="geometry">
          <rect>
-          <x>60</x>
-          <y>150</y>
-          <width>75</width>
-          <height>23</height>
+          <x>10</x>
+          <y>10</y>
+          <width>101</width>
+          <height>51</height>
          </rect>
         </property>
         <property name="text">
-         <string>Пуск</string>
+         <string>Поворот</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="pBtn3_Stop">
         <property name="geometry">
          <rect>
-          <x>70</x>
-          <y>200</y>
-          <width>75</width>
-          <height>23</height>
+          <x>10</x>
+          <y>130</y>
+          <width>101</width>
+          <height>51</height>
          </rect>
         </property>
         <property name="text">
          <string>Стоп</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="pBtn2_Step">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>101</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Шаг</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pBtn4_Init">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>190</y>
+          <width>101</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Инит</string>
+        </property>
+       </widget>
       </widget>
-      <widget class="QWidget" name="tab_4_result">
+      <widget class="QWidget" name="tab_6_result">
        <attribute name="title">
         <string>Результаты</string>
        </attribute>
