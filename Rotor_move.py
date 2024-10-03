@@ -34,8 +34,8 @@ class MainUI(QMainWindow):
         self.Line_pBtn2_Backward.pressed.connect(self.StartMotion)
         self.Line_pBtn2_Backward.released.connect(self.Stop)
 
-        self.Line_pBtn3_Step_Fwd.clicked.connect(self.StartStep)
-        self.Line_pBtn4_Step_Bkwd.clicked.connect(self.StartStep)
+        self.Line_pBtn3_Step_Fwd.clicked.connect(self.LinearStepUp)
+        self.Line_pBtn4_Step_Bkwd.clicked.connect(self.LinearStepDown)
         
         self.Line_pBtn5_Home.clicked.connect(self.Homing)
         self.Line_pBtn6_Stop.clicked.connect(self.Stop)
@@ -166,7 +166,7 @@ class MainUI(QMainWindow):
             # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
             message = "Движение запущено"
             print(message)
-            instrument.write_registers(0x0007, [0x0000]) # Ось движения прямо
+            # instrument.write_registers(0x0007, [0x0000]) # Ось движения прямо
             instrument.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
@@ -189,6 +189,28 @@ class MainUI(QMainWindow):
             print('Шаг')
             instrument.write_registers(0x0007, [dir])
             instrument.write_registers(0x6200, [0x0041, 0, step, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+        except (IOError, AttributeError, ValueError):
+            message = "Команда не прошла"
+            print(message)
+        # time.sleep(1)
+
+    def LinearStepUp(self) -> None:
+        speed = int(self.Line_lEd1_Speed.text())
+        step = int(self.Line_lEd2_Step.text())
+        try:
+            print('Шаг')
+            self.instrumentLinear.write_registers(0x6200, [0x0041, 0, step, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+        except (IOError, AttributeError, ValueError):
+            message = "Команда не прошла"
+            print(message)
+        # time.sleep(1)
+
+    def LinearStepDown(self) -> None:
+        speed = int(self.Line_lEd1_Speed.text())
+        step = 65525-int(self.Line_lEd2_Step.text())
+        try:
+            print('Шаг')
+            self.instrumentLinear.write_registers(0x6200, [0x0041, 0xFFFF, step, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда не прошла"
             print(message)
@@ -268,7 +290,7 @@ class MainUI(QMainWindow):
                 Z = line[3]
                 PHI = line[5]
                 ic(step-abs(PHI-PHI0)*100)
-                ic(step-abs(Z-Z0)*1)
+                ic(step-abs(Z-Z0)*2)
                 move = round((step-abs(PHI-PHI0)*100-(Z-Z0)*2)*2/3)
 
         except (IOError, AttributeError, ValueError):
