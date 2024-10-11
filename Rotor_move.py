@@ -20,7 +20,7 @@ class MainUI(QMainWindow):
         # Движение ротора
         self.Rtr_pBtn1_Forward.pressed.connect(self.StartMotion)
         self.Rtr_pBtn1_Forward.released.connect(self.Stop)
-        self.Rtr_pBtn2_Backward.pressed.connect(self.StartMotion)
+        # self.Rtr_pBtn2_Backward.pressed.connect(self.StartMotion)
         self.Rtr_pBtn2_Backward.released.connect(self.Stop)
 
         self.Rtr_pBtn3_Step_Fwd.clicked.connect(self.StartStep)
