@@ -406,6 +406,19 @@
          <string>Инит</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="pBtn5_Scan">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>70</y>
+          <width>161</width>
+          <height>111</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Сканирование</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tab_6_result">
        <attribute name="title">
