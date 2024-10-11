@@ -21,6 +21,7 @@ class MainUI(QMainWindow):
         self.pBtn2_Step.clicked.connect(self.PreciseStepLinear)
         self.pBtn3_Stop.clicked.connect(self.Stop)
         self.pBtn4_Init.clicked.connect(self.Init)
+        self.pBtn5_Scan.clicked.connect(self.Scan)
 
     def SetupScanStepGeneratrix(self, index: int) -> None:
         match index:
@@ -72,6 +73,7 @@ class MainUI(QMainWindow):
         # Запоминаем начальную позицию
         line = self.GetData()
         PHI = PHI0 = line[5]
+        # ic('Start', PHI)
         try:
             move = round((step-abs(PHI-PHI0)*100)*2/3)
             # instrument.write_registers(0x0007, [dir]) # Выбор направления движения
@@ -87,13 +89,13 @@ class MainUI(QMainWindow):
                 # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
                 # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
                 self.instrumentRotor.write_registers(0x6200, [0x0041, 0, move, speed, 0x0064,  0x0064, 0x0000, 0x0010])
-                time.sleep(1)
+                time.sleep(0.2)
                 line = self.GetData()
                 PHI = line[5]
-                ic(PHI)
+                # ic('Finish', PHI)
                 move = round((step-abs(PHI-PHI0)*100)*2/3)
             line = self.GetData()
-            ic(line[5]-PHI0)
+            # ic(line[5]-PHI0)
         except (IOError, AttributeError, ValueError):
             message = "Команда не прошла"
             print(message)
@@ -111,6 +113,17 @@ class MainUI(QMainWindow):
     def Init(self) -> None:
         self.InitRotMotor()
         self.InitLinearMotor()
+
+    def Scan(self) -> None:
+        line = self.GetData()
+        ic('Start', line[5])
+        for r in range(360):
+            self.PreciseStepRotor()
+            line = self.GetData()
+            ic('Go', line[5])
+            time.sleep(0.2)
+        line = self.GetData()
+        ic('Finish', line[5])
 
     def InitRotMotor(self) -> None:
         try: # Инициализация двигателя вращения ротора
