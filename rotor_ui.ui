@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>667</width>
-    <height>424</height>
+    <width>630</width>
+    <height>600</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>630</width>
+    <height>600</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Измерения ротора</string>
@@ -20,7 +26,7 @@
   <widget class="QWidget" name="centralwidget">
    <property name="minimumSize">
     <size>
-     <width>350</width>
+     <width>0</width>
      <height>0</height>
     </size>
    </property>
@@ -34,7 +40,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_1_info">
        <attribute name="title">
@@ -193,20 +199,89 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_7">
            <item>
-            <widget class="QLabel" name="tab2_lbl1_RotorDiam">
+            <widget class="QLabel" name="tab2_fr1_lbl1_RotorDiam">
              <property name="minimumSize">
               <size>
-               <width>150</width>
+               <width>0</width>
                <height>0</height>
               </size>
              </property>
              <property name="text">
               <string>Диаметр ротора</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="tab2_lEd1_RotorDiam"/>
+            <widget class="QLineEdit" name="tab2_fr1_lEd1_RotorDiam">
+             <property name="minimumSize">
+              <size>
+               <width>50</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>153,4</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="tab2_fr1_lbl1_mm">
+             <property name="text">
+              <string>мм</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="tab2_fr1_hSpacer1">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="tab2_fr1_lbl2_RotorLen">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Высота ротора</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="tab2_fr1_lEd2_RotorLen">
+             <property name="minimumSize">
+              <size>
+               <width>50</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>139,0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="tab2_fr1_lbl2_mm">
+             <property name="text">
+              <string>мм</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -219,22 +294,95 @@
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
            <item>
-            <widget class="QLabel" name="tab2_lbl2_RotorLen">
+            <widget class="QLabel" name="tab2_fr2_lbl3_ScanStepGeneratrix">
              <property name="minimumSize">
               <size>
-               <width>150</width>
+               <width>100</width>
                <height>0</height>
               </size>
              </property>
              <property name="text">
-              <string>Длина ротора</string>
+              <string>Шаг сканирования
+ по образующей</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="tab2_lEd2_RotorLen"/>
+            <widget class="QComboBox" name="tab2_fr2_cBox_ScanStepGeneratrix">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="currentText">
+              <string notr="true"/>
+             </property>
+             <property name="maxVisibleItems">
+              <number>3</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="tab2_fr2_hSpacer4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="tab2_fr2_lbl4_ScanStepAngle">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Шаг сканирования
+ по углу</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="tab2_fr2_lEd3_ScanStepAngle">
+             <property name="minimumSize">
+              <size>
+               <width>50</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>1</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="tab2_fr2_lbl5_mm">
+             <property name="minimumSize">
+              <size>
+               <width>50</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>мм</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -247,21 +395,91 @@
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
            <item>
-            <widget class="QLabel" name="tab2_lbl3_ScanStepGeneratrix">
+            <widget class="QLabel" name="tab2_fr3_lbl1_LinearSpeed">
+             <property name="minimumSize">
+              <size>
+               <width>70</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
-              <string>Шаг сканирования по образующей</string>
+              <string>Скорость
+ линейки</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="tab2_cBox_ScanStepGeneratrix">
-             <property name="currentText">
-              <string notr="true"/>
+            <widget class="QLineEdit" name="tab2_fr3_lEd_LinearSpeed">
+             <property name="minimumSize">
+              <size>
+               <width>50</width>
+               <height>30</height>
+              </size>
              </property>
-             <property name="maxVisibleItems">
-              <number>3</number>
+             <property name="text">
+              <string>200</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="tab2_fr3_lbl2">
+             <property name="text">
+              <string>об/мин</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="tab2_fr3_hSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="tab2_fr3_lbl3_RotorSpeed">
+             <property name="minimumSize">
+              <size>
+               <width>70</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Скорость
+ вращения</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="tab2_fr3_lEd_RotorSpeed">
+             <property name="minimumSize">
+              <size>
+               <width>50</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>1</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="tab2_fr3_lbl4">
+             <property name="text">
+              <string>об/мин</string>
              </property>
             </widget>
            </item>
@@ -269,43 +487,108 @@
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="tab2_frame4">
+         <widget class="QFrame" name="tab2_frame5_Init">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <layout class="QHBoxLayout" name="horizontalLayout_13">
            <item>
-            <widget class="QLabel" name="tab2_lbl4_ScanStepAngle">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="tab2_fr5_pBtn_Init">
              <property name="minimumSize">
               <size>
-               <width>150</width>
-               <height>0</height>
+               <width>200</width>
+               <height>50</height>
               </size>
              </property>
              <property name="text">
-              <string>Шаг сканирования по углу</string>
+              <string>Инициализация моторов</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="tab2_lEd3_ScanStepAngle"/>
+            <spacer name="tab2_fr5_hSpace2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="tab2_frame6_move">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>70</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>70</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_11">
            <item>
-            <widget class="QLabel" name="tab2_lbl5_ScanStepMM">
+            <widget class="QPushButton" name="tab2_fr6_pBtn1_MoveUp">
              <property name="minimumSize">
               <size>
-               <width>50</width>
-               <height>0</height>
+               <width>0</width>
+               <height>50</height>
               </size>
              </property>
              <property name="text">
-              <string>5 мм</string>
+              <string>Движение вверх</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             <property name="icon">
+              <iconset>
+               <normaloff>arrow_up.png</normaloff>arrow_up.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="tab2_fr6_pBtn2_MoveDown">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Движение вниз</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>arrow_down.png</normaloff>arrow_down.png</iconset>
              </property>
             </widget>
            </item>
@@ -313,29 +596,53 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="tab2_pBtn_ZeroSetupAngle">
+         <widget class="QFrame" name="tab2_frame7_Limits">
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>50</height>
+            <height>70</height>
            </size>
           </property>
-          <property name="text">
-           <string>Установка нуля по углу</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="tab2_pBtn_ZeroSetupGeneratrix">
-          <property name="minimumSize">
+          <property name="maximumSize">
            <size>
-            <width>0</width>
-            <height>50</height>
+            <width>16777215</width>
+            <height>70</height>
            </size>
           </property>
-          <property name="text">
-           <string>Установка нуля по образующей</string>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
           </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_12">
+           <item>
+            <widget class="QPushButton" name="tab2_fr7_pBtn1_UpperLimit">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Верхняя граница ротора</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="tab2_fr7_pBtn2_LowerLimit">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Нижняя граница ротора</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -354,7 +661,7 @@
        <attribute name="title">
         <string>Сверхточный режим</string>
        </attribute>
-       <widget class="QPushButton" name="pBtn1_Turn">
+       <widget class="QPushButton" name="tab5_pBtn1_Turn">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -367,7 +674,7 @@
          <string>Поворот</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pBtn3_Stop">
+       <widget class="QPushButton" name="tab5_pBtn3_Stop">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -380,7 +687,7 @@
          <string>Стоп</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pBtn2_Step">
+       <widget class="QPushButton" name="tab5_pBtn2_Step">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -393,20 +700,7 @@
          <string>Шаг</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pBtn4_Init">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>190</y>
-          <width>101</width>
-          <height>51</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Инит</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pBtn5_Scan">
+       <widget class="QPushButton" name="tab5_pBtn5_Scan">
         <property name="geometry">
          <rect>
           <x>160</x>
