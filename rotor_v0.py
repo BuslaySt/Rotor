@@ -27,7 +27,7 @@ class MainUI(QMainWindow):
         self.tab5_pBtn1_Turn.clicked.connect(self.PreciseStepRotor)
         self.tab5_pBtn2_Step.clicked.connect(self.PreciseStepLinear)
         self.tab5_pBtn3_Stop.clicked.connect(self.StopRotor)
-        self.tab5_pBtn5_Scan.clicked.connect(self.Scan)
+        # self.tab5_pBtn5_Scan.clicked.connect(self.ScanGeneratrix)
 
     def SetupScanStepGeneratrix(self, index: int) -> None:
         match index:
