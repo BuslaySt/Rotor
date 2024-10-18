@@ -13,30 +13,39 @@ class MainUI(QMainWindow):
         self.tab1_dateEdit.setCalendarPopup(True)
         self.tab1_timeEdit.setTime(datetime.datetime.now().time())
         # Окно настроек
-        self.tab2_fr2_cBox_ScanStepGeneratrix.addItems(['0,5 мм', '1 мм', '2 мм'])
-        self.tab2_fr2_cBox_ScanStepGeneratrix.setCurrentIndex(1)
-        self.tab2_fr2_cBox_ScanStepGeneratrix.currentIndexChanged.connect(self.SetupScanStepGeneratrix)
-        self.tab2_fr5_pBtn_Init.clicked.connect(self.Init)
-        self.tab2_fr6_pBtn1_MoveUp.pressed.connect(self.LinearMotionUp)
-        self.tab2_fr6_pBtn1_MoveUp.released.connect(self.StopLinear)
-        self.tab2_fr6_pBtn2_MoveDown.pressed.connect(self.LinearMotionDown)
-        self.tab2_fr6_pBtn2_MoveDown.released.connect(self.StopLinear)
-        self.tab2_fr7_pBtn1_UpperLimit.clicked.connect(self.SetUpperLimit)
-        self.tab2_fr7_pBtn2_LowerLimit.clicked.connect(self.SetLowerLimit)
+        self.pBtn_Init.clicked.connect(self.Init)
+        self.pBtn_RotateCW.pressed.connect(self.RotateCW)
+        self.pBtn_RotateCW.released.connect(self.StopRotor)
+        self.pBtn_RotateCCW.pressed.connect(self.RotateCCW)
+        self.pBtn_RotateCCW.released.connect(self.StopRotor)
+
+        self.pBtn_MoveUp.pressed.connect(self.LinearMotionUp)
+        self.pBtn_MoveUp.released.connect(self.StopLinear)
+        self.pBtn_MoveDown.pressed.connect(self.LinearMotionDown)
+        self.pBtn_MoveDown.released.connect(self.StopLinear)
+
+        self.pBtn_UpperLimit.clicked.connect(self.SetUpperLimit)
+        self.pBtn_LowerLimit.clicked.connect(self.SetLowerLimit)
+
         # Окно точного шагания
-        self.tab5_pBtn1_Turn.clicked.connect(self.PreciseStepRotor)
+        self.cBox_ScanStepGeneratrix.addItems(['0,5 мм', '1 мм', '2 мм'])
+        self.cBox_ScanStepGeneratrix.setCurrentIndex(1)
+        self.cBox_ScanStepGeneratrix.currentIndexChanged.connect(self.SetupScanStepGeneratrix)
+        self.pBtn_Position.clicked.connect(self.LinearAbsMotion)
+        self.tab5_pBtn1_Turn.clicked.connect(self.SimpleStepLinear)
         self.tab5_pBtn2_Step.clicked.connect(self.PreciseStepLinear)
         self.tab5_pBtn3_Stop.clicked.connect(self.StopRotor)
         # self.tab5_pBtn5_Scan.clicked.connect(self.ScanGeneratrix)
+        self.pBtn_ShowData.clicked.connect(self.ShowData)
 
     def SetupScanStepGeneratrix(self, index: int) -> None:
         match index:
             case 0:
-                pass
+                self.LinearStep = 500
             case 1:
-                pass
+                self.LinearStep = 1000
             case 2:
-                pass
+                self.LinearStep = 2000
 
     def Init(self) -> None:
         self.InitRotMotor()
@@ -95,9 +104,63 @@ class MainUI(QMainWindow):
             message = "Запуск привода линейки не удался"
             print(message)
 
+    def RotateCW(self) -> None:
+        try:
+            speed = int(self.lEd_RotorSpeed.text())
+        except ValueError:
+            speed = 1
+            message = "Скорость задана неверно"
+            print(message)
+            self.statusbar.showMessage(message)
+        try:
+            # Формирование массива параметров для команды:
+            # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
+            # 0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
+            # 0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
+            # 0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
+            # 0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
+            # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
+            # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
+            # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
+            message = "Движение запущено"
+            print(message)
+            self.statusbar.showMessage(message)
+            self.instrumentRotor.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+        except (IOError, AttributeError, ValueError):
+            message = "Команда для движения не прошла"
+            print(message)
+            self.statusbar.showMessage(message)
+
+    def RotateCCW(self) -> None:
+        try:
+            speed = 65536-int(self.lEd_RotorSpeed.text())
+        except ValueError:
+            speed = 65535
+            message = "Скорость задана неверно"
+            print(message)
+            self.statusbar.showMessage(message)
+        try:
+            # Формирование массива параметров для команды:
+            # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
+            # 0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
+            # 0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
+            # 0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
+            # 0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
+            # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
+            # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
+            # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
+            message = "Движение запущено"
+            print(message)
+            self.statusbar.showMessage(message)
+            self.instrumentRotor.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+        except (IOError, AttributeError, ValueError):
+            message = "Команда для движения не прошла"
+            print(message)
+            self.statusbar.showMessage(message)
+
     def LinearMotionDown(self) -> None:
         try:
-            speed = int(self.tab2_fr5_lEd_Speed.text())
+            speed = int(self.lEd_LinearSpeed.text())
         except ValueError:
             speed = 200
             message = "Скорость задана неверно"
@@ -124,7 +187,7 @@ class MainUI(QMainWindow):
 
     def LinearMotionUp(self) -> None:
         try:
-            speed = 65535-int(self.tab2_fr5_lEd_Speed.text())
+            speed = 65535-int(self.lEd_LinearSpeed.text())
         except ValueError:
             speed = 65535-200
             message = "Скорость задана неверно"
@@ -150,28 +213,45 @@ class MainUI(QMainWindow):
             print(message)
             self.statusbar.showMessage(message)
 
+    def LinearAbsMotion(self) -> None:
+        coord1, coord2 = divmod(int(self.lEd_Pos.text()), 0x10000)
+        ic(hex(coord1), hex(coord2))
+        try:
+            # Формирование массива параметров для команды:
+            # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
+            # 0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
+            # 0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
+            # 0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
+            # 0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
+            # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
+            # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
+            # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
+            message = "Движение запущено"
+            print(message)
+            self.statusbar.showMessage(message)
+            self.instrumentLinear.write_registers(0x6200, [0x0001, coord1, coord2, 200, 1000, 1000, 0, 0x0010])
+
+        except (IOError, AttributeError, ValueError):
+            message = "Команда для движения не прошла"
+            print(message)
+            self.statusbar.showMessage(message)      
+
     def SetUpperLimit(self) -> None:
         self.UpperLimit = int(self.GetData()[3])
         message = "".join(["Установлена верхняя граница ротора - ", str(self.UpperLimit)])
         print(message)
         self.statusbar.showMessage(message)
-        self.tab2_fr7_pBtn1_UpperLimit.setText("".join(["Верхняя граница ротора: ", str(self.UpperLimit)]))
+        self.pBtn_UpperLimit.setText("".join(["Верхняя граница ротора: ", str(self.UpperLimit)]))
 
     def SetLowerLimit(self) -> None:
-        self.DownLimit = int(self.GetData()[3])
-        message = "".join(["Установлена нижняя граница ротора - ", str(self.DownLimit)])
+        self.LowerLimit = int(self.GetData()[3])
+        message = "".join(["Установлена нижняя граница ротора - ", str(self.LowerLimit)])
         print(message)
         self.statusbar.showMessage(message)
-        self.tab2_fr7_pBtn2_DownLimit.setText("".join(["Нижняя граница ротора: ", str(self.DownLimit)]))
+        self.pBtn_LowerLimit.setText("".join(["Нижняя граница ротора: ", str(self.LowerLimit)]))
 
-    def PreciseStepLinear(self) -> None:
-        speed = 100
-        step = 2050  # 1 mm
-        precision = 100 # Точность - 0.05 mm
-        # Запоминаем начальную позицию
-        line = self.GetData()
-        ic(line[3])
-        Z = Z0 = line[3]
+    def SimpleStepLinear(self, speed=100, step=2050, precision=10) -> None:
+        Z = Z0 = self.GetData()[3] # Запоминаем начальную позицию
         try:
             move = round((step-abs(Z-Z0)*2)*2/3)
             while (step-abs(Z-Z0)*2) > precision:
@@ -259,8 +339,15 @@ class MainUI(QMainWindow):
         line = self.GetData()
         ic('Finish', line[5])
 
-    def ScanGeneratrix(self) -> None:
-        pass
+    def ScanGeneratrixUp(self) -> None:
+        finish = self.UpperLimit
+        start = self.LowerLimit
+        distance = abs(finish-start)
+        step = self.LinearStep
+        steps = distance/step
+
+    def ShowData(self) -> None:
+        self.txtBrwser_ShowData.setText(str(self.GetData()))
 
     def GetData(self) -> list:
         try:
@@ -270,24 +357,25 @@ class MainUI(QMainWindow):
                 # Send the command to the DataPort
                 self.serialData.write(command.encode())
                 line = str(self.serialData.readline().strip()) # Строка вида
-            print(line)
+            self.lbl_Data.setText(line)
             Bx = float(line.split(';')[0][5:-3].replace(',','.'))
             By = float(line.split(';')[1][4:-3].replace(',','.'))
             Bz = float(line.split(';')[2][5:-3].replace(',','.'))
-            Z = float(line.split(';')[3][3:-3].replace(',','.'))
-            try:    Zerr = float(line.split(';')[4][6:].replace(',','.'))
+            Z = int(line.split(';')[3][3:-3].replace(',','.'))
+            try:    Zerr = int(line.split(';')[4][6:].replace(',','.'))
             except: Zerr = line.split(';')[4][6:].replace(',','.')
             PHI = float(line.split(';')[5][5:-4].replace(',','.'))
-            try:    PHIErr = float(line.split(';')[6][8:].replace(',','.'))
+            try:    PHIErr = float(line.split(';')[6][8:-4].replace(',','.'))
             except: PHIErr = line.split(';')[6][8:].replace(',','.')
             T = float(line.split(';')[7][3:-7].replace(',','.'))
 
-            # print([Bx, By, Bz, Z, Zerr, PHI, PHIErr, T])
             return [Bx, By, Bz, Z, Zerr, PHI, PHIErr, T]
 
         except ValueError as ve:             print("Error:", str(ve))
         except serial.SerialException as se: print("Serial port error:", str(se))
         except Exception as e:               print("An error occurred:", str(e))
+
+        return [0, 0, 0, 0, 0, 0, 0, 0]
 
 if __name__ == '__main__':
     # app = QApplication(sys.argv)
