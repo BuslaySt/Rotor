@@ -40,9 +40,9 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>1</number>
       </property>
-      <widget class="QWidget" name="tab_1_info">
+      <widget class="QWidget" name="tab1_info">
        <attribute name="title">
         <string>Информация</string>
        </attribute>
@@ -184,7 +184,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2_setup">
+      <widget class="QWidget" name="tab2_setup">
        <attribute name="title">
         <string>Настройки</string>
        </attribute>
@@ -215,7 +215,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="tab2_fr1_lEd1_RotorDiam">
+            <widget class="QLineEdit" name="lEd_RotorDiam">
              <property name="minimumSize">
               <size>
                <width>50</width>
@@ -264,7 +264,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="tab2_fr1_lEd2_RotorLen">
+            <widget class="QLineEdit" name="lEd_RotorLen">
              <property name="minimumSize">
               <size>
                <width>50</width>
@@ -287,7 +287,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="tab2_frame3">
+         <widget class="QFrame" name="tab2_frame2">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -313,7 +313,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="tab2_fr3_lEd_LinearSpeed">
+            <widget class="QLineEdit" name="lEd_LinearSpeed">
              <property name="minimumSize">
               <size>
                <width>50</width>
@@ -363,7 +363,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="tab2_fr3_lEd_RotorSpeed">
+            <widget class="QLineEdit" name="lEd_RotorSpeed">
              <property name="minimumSize">
               <size>
                <width>50</width>
@@ -386,7 +386,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="tab2_frame5_Init">
+         <widget class="QFrame" name="tab2_frame3_Init">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -408,7 +408,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="tab2_fr5_pBtn_Init">
+            <widget class="QPushButton" name="pBtn_Init">
              <property name="minimumSize">
               <size>
                <width>200</width>
@@ -437,7 +437,53 @@
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="tab2_frame6_move">
+         <widget class="QFrame" name="tab2_frame4">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <item>
+            <widget class="QPushButton" name="pBtn_RotateCW">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Вращение по часовой</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>arrow_left.png</normaloff>arrow_left.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pBtn_RotateCCW">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Вращение против часовой</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>arrow_right.png</normaloff>arrow_right.png</iconset>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="tab2_frame5_move">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -458,7 +504,7 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_11">
            <item>
-            <widget class="QPushButton" name="tab2_fr6_pBtn1_MoveUp">
+            <widget class="QPushButton" name="pBtn_MoveUp">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -475,7 +521,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="tab2_fr6_pBtn2_MoveDown">
+            <widget class="QPushButton" name="pBtn_MoveDown">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -495,7 +541,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="tab2_frame7_Limits">
+         <widget class="QFrame" name="tab2_frame6_Limits">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -516,7 +562,7 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_12">
            <item>
-            <widget class="QPushButton" name="tab2_fr7_pBtn1_UpperLimit">
+            <widget class="QPushButton" name="pBtn_UpperLimit">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -529,7 +575,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="tab2_fr7_pBtn2_LowerLimit">
+            <widget class="QPushButton" name="pBtn_LowerLimit">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -546,21 +592,11 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_3_fast">
-       <attribute name="title">
-        <string>Быстрый режим</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab_4_normal">
-       <attribute name="title">
-        <string>Нормальный режим</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab_5_precise">
+      <widget class="QWidget" name="tab3_precise">
        <attribute name="title">
         <string>Сверхточный режим</string>
        </attribute>
-       <widget class="QPushButton" name="tab5_pBtn1_Turn">
+       <widget class="QPushButton" name="tab3_pBtn1_Turn">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -573,7 +609,7 @@
          <string>Поворот</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="tab5_pBtn3_Stop">
+       <widget class="QPushButton" name="tab3_pBtn3_Stop">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -586,7 +622,7 @@
          <string>Стоп</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="tab5_pBtn2_Step">
+       <widget class="QPushButton" name="tab3_pBtn2_Step">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -599,7 +635,7 @@
          <string>Шаг</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="tab5_pBtn5_Scan">
+       <widget class="QPushButton" name="tab3_pBtn5_Scan">
         <property name="geometry">
          <rect>
           <x>210</x>
@@ -612,7 +648,7 @@
          <string>Сканирование</string>
         </property>
        </widget>
-       <widget class="QFrame" name="tab2_frame2">
+       <widget class="QFrame" name="tab3_frame1">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -629,7 +665,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_9">
          <item>
-          <widget class="QLabel" name="tab2_fr2_lbl3_ScanStepGeneratrix">
+          <widget class="QLabel" name="tab5_lbl3_ScanStepGeneratrix">
            <property name="minimumSize">
             <size>
              <width>100</width>
@@ -643,7 +679,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="tab2_fr2_cBox_ScanStepGeneratrix">
+          <widget class="QComboBox" name="cBox_ScanStepGeneratrix">
            <property name="minimumSize">
             <size>
              <width>100</width>
@@ -659,7 +695,7 @@
           </widget>
          </item>
          <item>
-          <spacer name="tab2_fr2_hSpacer4">
+          <spacer name="tab5_hSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -672,7 +708,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="tab2_fr2_lbl4_ScanStepAngle">
+          <widget class="QLabel" name="tab5_lbl4_ScanStepAngle">
            <property name="minimumSize">
             <size>
              <width>100</width>
@@ -689,7 +725,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="tab2_fr2_lEd3_ScanStepAngle">
+          <widget class="QLineEdit" name="lEd_ScanStepAngle">
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -702,7 +738,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="tab2_fr2_lbl5_mm">
+          <widget class="QLabel" name="tab5_lbl5_mm">
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -719,8 +755,81 @@
          </item>
         </layout>
        </widget>
+       <widget class="QLineEdit" name="lEd_Pos">
+        <property name="geometry">
+         <rect>
+          <x>260</x>
+          <y>40</y>
+          <width>161</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pBtn_Position">
+        <property name="geometry">
+         <rect>
+          <x>260</x>
+          <y>90</y>
+          <width>101</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Позиция</string>
+        </property>
+       </widget>
+       <widget class="QTextBrowser" name="txtBrwser_ShowData">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>400</y>
+          <width>171</width>
+          <height>81</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pBtn_ShowData">
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>400</y>
+          <width>151</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Показать данные
+ с датчиков</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_Data">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>490</y>
+          <width>581</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
       </widget>
-      <widget class="QWidget" name="tab_6_result">
+      <widget class="QWidget" name="tab4_fast">
+       <attribute name="title">
+        <string>Быстрый режим</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab5_normal">
+       <attribute name="title">
+        <string>Нормальный режим</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab6_result">
        <attribute name="title">
         <string>Результаты</string>
        </attribute>
