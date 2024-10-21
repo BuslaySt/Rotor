@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>630</width>
+    <width>722</width>
     <height>600</height>
    </rect>
   </property>
@@ -808,9 +808,9 @@
        <widget class="QLabel" name="lbl_Data">
         <property name="geometry">
          <rect>
-          <x>10</x>
+          <x>0</x>
           <y>490</y>
-          <width>581</width>
+          <width>691</width>
           <height>41</height>
          </rect>
         </property>
