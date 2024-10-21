@@ -3,11 +3,15 @@ from PyQt5.uic import loadUi
 import sys, datetime, time
 import minimalmodbus, serial
 from icecream import ic
+import pandas as pd
 
 class MainUI(QMainWindow):
     def __init__(self):
         super(MainUI, self).__init__()
         loadUi("rotor_ui.ui", self)
+
+        self.data = pd.DataFrame(columns=['Bx','By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T'])
+
         # Окно инициализации
         self.tab1_dateEdit.setDate(datetime.datetime.now())
         self.tab1_dateEdit.setCalendarPopup(True)
@@ -30,12 +34,13 @@ class MainUI(QMainWindow):
         # Окно точного шагания
         self.cBox_ScanStepGeneratrix.addItems(['0,5 мм', '1 мм', '2 мм'])
         self.cBox_ScanStepGeneratrix.setCurrentIndex(1)
+        self.LinearStep = 1000 # 1mm default
         self.cBox_ScanStepGeneratrix.currentIndexChanged.connect(self.SetupScanStepGeneratrix)
         self.pBtn_Position.clicked.connect(self.LinearAbsMotion)
-        self.tab5_pBtn1_Turn.clicked.connect(self.SimpleStepLinear)
-        self.tab5_pBtn2_Step.clicked.connect(self.PreciseStepLinear)
-        self.tab5_pBtn3_Stop.clicked.connect(self.StopRotor)
-        # self.tab5_pBtn5_Scan.clicked.connect(self.ScanGeneratrix)
+        self.tab3_pBtn1_Turn.clicked.connect(self.Step)
+        self.tab3_pBtn2_Step.clicked.connect(self.Step)
+        self.tab3_pBtn3_Stop.clicked.connect(self.StopRotor)
+        self.tab3_pBtn5_Scan.clicked.connect(self.ScanGeneratrix)
         self.pBtn_ShowData.clicked.connect(self.ShowData)
 
     def SetupScanStepGeneratrix(self, index: int) -> None:
@@ -250,32 +255,28 @@ class MainUI(QMainWindow):
         self.statusbar.showMessage(message)
         self.pBtn_LowerLimit.setText("".join(["Нижняя граница ротора: ", str(self.LowerLimit)]))
 
-    def SimpleStepLinear(self, speed=100, step=2050, precision=10) -> None:
-        Z = Z0 = self.GetData()[3] # Запоминаем начальную позицию
+    def Step(self):
+        self.SimpleStepLinear(speed=50, step=2010)
+
+    def SimpleStepLinear(self, speed=50, step=2010) -> None:
+        Z0 = self.GetData()[3] # Запоминаем начальную позицию
+        step1, step2 = divmod(step, 0x10000)
+        # Формирование массива параметров для команды:
+        # 0x0041 - 65 - режим однократного увеличения позиции (шаг), записывается по адресу 0x6200
+        # 0x0000 - верхние два байта кол-ва оборотов (=0 обычно), записывается по адресу 0x6201
+        # 0x0000 - нижние два байта кол-ва оборотов  (=шаг), записывается по адресу 0x6202
+        # 0x0000 - значение скорости вращения (об/мин), записывается по адресу 0x6203
+        # 0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
+        # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
+        # 0x000A - задержка перед началом движения (10 мс), записывается по адресу 0x6206
+        # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
         try:
-            move = round((step-abs(Z-Z0)*2)*2/3)
-            while (step-abs(Z-Z0)*2) > precision:
-                ic(move)
-                # Формирование массива параметров для команды:
-                # 0x0041 - 65 - режим однократного увеличения позиции (шаг), записывается по адресу 0x6200
-                # 0x0000 - верхние два байта кол-ва оборотов (=0 обычно), записывается по адресу 0x6201
-                # 0x0000 - нижние два байта кол-ва оборотов  (=шаг), записывается по адресу 0x6202
-                # 0x0000 - значение скорости вращения (об/мин), записывается по адресу 0x6203
-                # 0x0064 - значение времени ускорения (100 мс), записывается по адресу 0x6204
-                # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
-                # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
-                # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
-                self.instrumentLinear.write_registers(0x6200, [0x0041, 0, move, speed, 0x0064, 0x0064, 0x0000, 0x0010])
-                time.sleep(1)
-                line = self.GetData()
-                Z = line[3]
-                ic(Z)
-                move = round((step-abs(Z-Z0)*2)*2/3)
-            line = self.GetData()
-            ic(line[3]-Z0)
+            self.instrumentLinear.write_registers(0x6200, [0x0041, step1, step2, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+            time.sleep(0.5)
+            ic("Шаг:", self.GetData()[3]-Z0)
 
         except (IOError, AttributeError, ValueError):
-            message = "Команда не прошла"
+            message = "Команда на линейный шаг не прошла"
             print(message)
 
     def PreciseStepRotor(self) -> None:
@@ -339,12 +340,39 @@ class MainUI(QMainWindow):
         line = self.GetData()
         ic('Finish', line[5])
 
-    def ScanGeneratrixUp(self) -> None:
-        finish = self.UpperLimit
-        start = self.LowerLimit
+    def ScanGeneratrix(self) -> None:
+        start = self.UpperLimit
+        finish = self.LowerLimit
         distance = abs(finish-start)
         step = self.LinearStep
-        steps = distance/step
+        steps = int(distance/step)
+
+        line = self.GetData()
+        self.data = pd.DataFrame({'Bx': [line[0]], 'By': [line[1]], 'Bz': [line[2]], 'Z': [line[3]], 'Zerr': [line[4]], 'PHI': [line[5]], 'PHIerr': [line[6]], 'T': [line[7]]})
+
+        for s in range(steps):
+            self.SimpleStepLinear(speed=50, step=2000)
+            line = self.GetData()
+            self.data.loc[len(self.data)] = line
+            # new_data = {'Bx': [line[0]], 'By': [line[1]], 'Bz': [line[2]], 'Z': [line[3]], 'Zerr': [line[4]], 'PHI': [line[5]], 'PHIerr': [line[6]], 'T': [line[7]]}
+            # df_add = pd.DataFrame(new_data)
+            # self.data = pd.concat([self.data, df_add], ignore_index=True)
+
+        line = self.GetData()
+        ic(finish-line[3])
+
+        for s in range(steps):
+            self.SimpleStepLinear(speed=50, step=0xFFFFFFFF-2000)
+            line = self.GetData()
+            self.data.loc[len(self.data)] = line
+            # new_data = {'Bx': [line[0]], 'By': [line[1]], 'Bz': [line[2]], 'Z': [line[3]], 'Zerr': [line[4]], 'PHI': [line[5]], 'PHIerr': [line[6]], 'T': [line[7]]}
+            # df_add = pd.DataFrame(new_data)
+            # self.data = pd.concat([self.data, df_add], ignore_index=True)
+
+        line = self.GetData()
+        ic(start-line[3])
+
+        print(self.data)
 
     def ShowData(self) -> None:
         self.txtBrwser_ShowData.setText(str(self.GetData()))
@@ -356,18 +384,18 @@ class MainUI(QMainWindow):
                 command = 'R'
                 # Send the command to the DataPort
                 self.serialData.write(command.encode())
-                line = str(self.serialData.readline().strip()) # Строка вида
-            self.lbl_Data.setText(line)
-            Bx = float(line.split(';')[0][5:-3].replace(',','.'))
-            By = float(line.split(';')[1][4:-3].replace(',','.'))
-            Bz = float(line.split(';')[2][5:-3].replace(',','.'))
-            Z = int(line.split(';')[3][3:-3].replace(',','.'))
-            try:    Zerr = int(line.split(';')[4][6:].replace(',','.'))
-            except: Zerr = line.split(';')[4][6:].replace(',','.')
-            PHI = float(line.split(';')[5][5:-4].replace(',','.'))
-            try:    PHIErr = float(line.split(';')[6][8:-4].replace(',','.'))
-            except: PHIErr = line.split(';')[6][8:].replace(',','.')
-            T = float(line.split(';')[7][3:-7].replace(',','.'))
+                line = str(self.serialData.readline().strip()).split(';') # Строка вида
+            self.lbl_Data.setText(str(line))
+            Bx = float(line[0][5:-3].replace(',','.'))
+            By = float(line[1][4:-3].replace(',','.'))
+            Bz = float(line[2][5:-3].replace(',','.'))
+            Z = int(line[3][3:-3].replace(',','.'))
+            try:    Zerr = int(line[4][6:-3].replace(',','.'))
+            except: Zerr = line[4][6:]
+            PHI = float(line[5][5:-4].replace(',','.'))
+            try:    PHIErr = float(line[6][8:-4].replace(',','.'))
+            except: PHIErr = line[6][8:]
+            T = float(line[7][3:-7].replace(',','.'))
 
             return [Bx, By, Bz, Z, Zerr, PHI, PHIErr, T]
 
