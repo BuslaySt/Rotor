@@ -223,7 +223,7 @@
               </size>
              </property>
              <property name="text">
-              <string>153,4</string>
+              <string>155</string>
              </property>
             </widget>
            </item>
@@ -596,7 +596,7 @@
        <attribute name="title">
         <string>Сверхточный режим</string>
        </attribute>
-       <widget class="QPushButton" name="tab3_pBtn1_Turn">
+       <widget class="QPushButton" name="tab3_pBtn1_Rotate">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -735,6 +735,9 @@
            <property name="text">
             <string>1</string>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
           </widget>
          </item>
          <item>
@@ -758,27 +761,31 @@
        <widget class="QLineEdit" name="lEd_Pos">
         <property name="geometry">
          <rect>
-          <x>260</x>
+          <x>410</x>
           <y>40</y>
-          <width>161</width>
+          <width>101</width>
           <height>41</height>
          </rect>
         </property>
         <property name="text">
          <string>0</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
        </widget>
        <widget class="QPushButton" name="pBtn_Position">
         <property name="geometry">
          <rect>
-          <x>260</x>
+          <x>410</x>
           <y>90</y>
           <width>101</width>
           <height>51</height>
          </rect>
         </property>
         <property name="text">
-         <string>Позиция</string>
+         <string>Абсолютная
+позиция</string>
         </property>
        </widget>
        <widget class="QTextBrowser" name="txtBrwser_ShowData">
@@ -815,7 +822,65 @@
          </rect>
         </property>
         <property name="text">
-         <string>TextLabel</string>
+         <string>Тут будут данные с датчиков</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lEd_Step">
+        <property name="geometry">
+         <rect>
+          <x>120</x>
+          <y>70</y>
+          <width>101</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>1000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lEd_Rotation">
+        <property name="geometry">
+         <rect>
+          <x>120</x>
+          <y>10</y>
+          <width>101</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>91</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_mkm_1">
+        <property name="geometry">
+         <rect>
+          <x>230</x>
+          <y>30</y>
+          <width>47</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>мкм</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_mkm_2">
+        <property name="geometry">
+         <rect>
+          <x>230</x>
+          <y>90</y>
+          <width>47</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>мкм</string>
         </property>
        </widget>
       </widget>
