@@ -10,8 +10,6 @@ class MainUI(QMainWindow):
         super(MainUI, self).__init__()
         loadUi("rotor_ui.ui", self)
 
-        self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T', 'Zstep'])
-
         # Окно инициализации
         self.tab1_dateEdit.setDate(datetime.datetime.now())
         self.tab1_dateEdit.setCalendarPopup(True)
@@ -40,7 +38,7 @@ class MainUI(QMainWindow):
         self.tab3_pBtn1_Rotate.clicked.connect(self.Rotate)
         self.tab3_pBtn2_Step.clicked.connect(self.Step)
         self.tab3_pBtn3_Stop.clicked.connect(self.StopRotor)
-        self.tab3_pBtn5_Scan.clicked.connect(self.ScanGeneratrix)
+        self.tab3_pBtn5_Scan.clicked.connect(self.Scan)
         self.pBtn_ShowData.clicked.connect(self.ShowData)
 
     def SetupScanStepGeneratrix(self, index: int) -> None:
@@ -258,11 +256,12 @@ class MainUI(QMainWindow):
 
     def Step(self):
         step = round(int(self.lEd_Step.text())*2015/1000)
-        self.SimpleStepLinear(speed=100, step=step)
+        self.SimpleStepLinear(speed=50, step=step)
 
-    def SimpleStepLinear(self, speed=100, step=2015) -> int:
+    def SimpleStepLinear(self, speed=50, step=2015) -> int:
         Z0 = self.GetData()[3] # Запоминаем начальную позицию
-        if step<0:
+        step *= -1 # Ось линейки направлена вверх, а ось двигателя - вниз, поэтому меняется знак
+        if step < 0:
             step = 0xFFFFFFFF+step
         step1, step2 = divmod(step, 0x10000)
         # Формирование массива параметров для команды:
@@ -288,12 +287,13 @@ class MainUI(QMainWindow):
         return realstep
 
     def Rotate(self):
+        ''' Полный оборот вокруг оси '''
         rotationData = pd.Series()
         rotation = int(self.lEd_Rotation.text())
         line = self.GetData()
         start = line[5]
         ic('Старт', start)
-        for _ in range(1):
+        for _ in range(487):
             realangle = self.SimpleStepRotor(speed=1, angle=rotation)
             rotationData.loc[len(rotationData)] = realangle
         line = self.GetData()
@@ -304,6 +304,7 @@ class MainUI(QMainWindow):
         print(rotationData.describe())
 
     def SimpleStepRotor(self, speed=1, angle=67) -> int:
+        ''' Один поворот на заданный угол '''
         PHI0 = self.GetData()[5] # Запоминаем начальный угол
         if angle<0:
             angle = 0xFFFFFFFF+angle
@@ -319,12 +320,12 @@ class MainUI(QMainWindow):
         # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
         try:
             self.instrumentRotor.write_registers(0x6200, [0x0041, step1, step2, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
-            time.sleep(0.5)
+            time.sleep(2)
             realrotation = self.GetData()[5]-PHI0
             print("Угол:", realrotation)
 
         except (IOError, AttributeError, ValueError):
-            message = "Команда на линейный шаг не прошла"
+            message = "Команда на поворот не прошла"
             print(message)
             realrotation = 0
 
@@ -346,51 +347,71 @@ class MainUI(QMainWindow):
             message = "Команда не прошла"
             print(message)
 
-    def ScanAround(self) -> None:
-        line = self.GetData()
-        ic('Start', line[5])
-        for r in range(360):
-            self.PreciseStepRotor()
+    def ScanGeneratrix(self, steps: int, step: int) -> None:
+        GeneratrixScanStepData = pd.Series()
+        for s in range(steps):
+            realstep = abs(self.SimpleStepLinear(speed=100, step=-1*step))
+            GeneratrixScanStepData.loc[len(GeneratrixScanStepData)] = realstep
             line = self.GetData()
-            ic('Go', line[5])
-            time.sleep(0.2)
-        line = self.GetData()
-        ic('Finish', line[5])
+            self.data.loc[len(self.data)] = line
+        print(GeneratrixScanStepData.describe())
 
-    def ScanGeneratrix(self) -> None:
-        # Сканирование по образующей вниз и вверх от заданных границ
-        line = self.GetData()
+    def Scan(self) -> None:
+        ''' Сканирование по образующей вниз и вверх от заданных границ '''
+        self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T'])
 
+        line = self.GetData()
         start = int(line[3])
         finish = self.LowerLimit
         distance = abs(finish-start)
         step = int(self.LinearStep*2015/1000)
-        steps = int(distance/self.LinearStep)
+        steps = round(distance/self.LinearStep)
+        imp_in_degree = round(360*91/(3.14159*int(self.lEd_RotorDiam.text()))) # Количество импульсов двигателя на один мм поверхности вращения
+        ic(imp_in_degree)
+        rotation = int(self.lEd_ScanStepAngle.text())*imp_in_degree
+        ic(rotation)
 
-        # Движение вниз
-        for s in range(steps):
-            realstep = abs(self.SimpleStepLinear(speed=100, step=step))
+        for _ in range(10):
+            # Движение вниз
+            self.ScanGeneratrix(steps=steps, step=step)
+
             line = self.GetData()
-            line.append(realstep)
-            self.data.loc[len(self.data)] = line
+            ic(finish-line[3])
+            
+            # Шаг по окружности
+            realangle = self.SimpleStepRotor(speed=1, angle=rotation)
 
-        line = self.GetData()
-        ic(finish-line[3])
+            # Движение вверх
+            self.ScanGeneratrix(steps=steps, step=-1*step)
 
-        # Движение вверх
-        for s in range(steps):
-            realstep = abs(self.SimpleStepLinear(speed=100, step=0xFFFFFFFF-step))
+            # Шаг по окружности
+            realangle = self.SimpleStepRotor(speed=1, angle=rotation)
+
             line = self.GetData()
-            line.append(realstep)
-            self.data.loc[len(self.data)] = line
+            shift = line[3]-start
+            print('Сдвиг после скана:', shift)
 
-        line = self.GetData()
-        ic(start-line[3])
+            # Выборка люфта
+            # time.sleep(0.5)
+            realstep = abs(self.SimpleStepLinear(speed=100, step=4*step))
+            realstep = abs(self.SimpleStepLinear(speed=100, step=-3*step))
 
-        # print(self.data)
-        # print(self.data.describe())
+            line = self.GetData()
+            shift = line[3]-start
+            print('Сдвиг после парковки:', shift)
 
+            # Парковка
+            print('Парковка по верхней границе')
+            count = 0
+            while shift > 5 and count < 10:
+                time.sleep(0.5)
+                realstep = abs(self.SimpleStepLinear(speed=100, step=-1*shift))
+                line = self.GetData()
+                shift = line[3]-start
+                print('Сдвиг:', shift)
+                count += 1
 
+        self.data.to_csv('data.csv')
 
     def ShowData(self) -> None:
         self.txtBrwser_ShowData.setText(str(self.GetData()))
