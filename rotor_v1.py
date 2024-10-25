@@ -255,10 +255,14 @@ class MainUI(QMainWindow):
         self.pBtn_LowerLimit.setText("".join(["Нижняя граница ротора: ", str(self.LowerLimit)]))
 
     def Step(self):
-        step = round(int(self.lEd_Step.text())*2015/1000)
-        self.SimpleStepLinear(speed=50, step=step)
+        step = round(int(self.lEd_Step.text())*2010/1000)
+        speed = int(self.lEd_LinearSpeed.text()) 
+        self.SimpleStepLinear(speed=speed, step=step)
 
-    def SimpleStepLinear(self, speed=50, step=2015) -> int:
+    def SimpleStepLinear(self, speed=50, step=2010) -> int:
+        ''' Простой шаг по образующей на заданное расстояние '''
+        sleepStep = abs(step)/speed/100 # Время на паузу в сек, чтобы мотор успел прокрутиться
+        if sleepStep < 0.5: sleepStep = 0.5
         Z0 = self.GetData()[3] # Запоминаем начальную позицию
         step *= -1 # Ось линейки направлена вверх, а ось двигателя - вниз, поэтому меняется знак
         if step < 0:
@@ -275,9 +279,9 @@ class MainUI(QMainWindow):
         # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
         try:
             self.instrumentLinear.write_registers(0x6200, [0x0041, step1, step2, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
-            time.sleep(0.5)
+            time.sleep(sleepStep) # Пауза, чтобы мотор успел прокрутиться
             realstep = self.GetData()[3]-Z0
-            ic("Шаг:", realstep)
+            # ic("Шаг:", realstep)
 
         except (IOError, AttributeError, ValueError):
             message = "Команда на линейный шаг не прошла"
@@ -304,7 +308,7 @@ class MainUI(QMainWindow):
         print(rotationData.describe())
 
     def SimpleStepRotor(self, speed=1, angle=67) -> int:
-        ''' Один поворот на заданный угол '''
+        ''' Простой поворот на заданный угол '''
         PHI0 = self.GetData()[5] # Запоминаем начальный угол
         if angle<0:
             angle = 0xFFFFFFFF+angle
@@ -320,7 +324,7 @@ class MainUI(QMainWindow):
         # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
         try:
             self.instrumentRotor.write_registers(0x6200, [0x0041, step1, step2, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
-            time.sleep(2)
+            time.sleep(1) # Пауза на устаканивание
             realrotation = self.GetData()[5]-PHI0
             print("Угол:", realrotation)
 
@@ -362,56 +366,86 @@ class MainUI(QMainWindow):
 
         line = self.GetData()
         start = int(line[3])
-        finish = self.LowerLimit
-        distance = abs(finish-start)
-        step = int(self.LinearStep*2015/1000)
-        steps = round(distance/self.LinearStep)
+        distance = abs(self.LowerLimit-start)
+        ic(distance)
+        step = int(self.LinearStep*2010/1000)
+        ic(step)
+        steps = round(distance/self.LinearStep) # Количество шагов на образующую
+        ic(steps)
+        finish = start - self.LinearStep*steps
+        ic(finish)
+        ic(finish-self.LowerLimit)
         imp_in_degree = round(360*91/(3.14159*int(self.lEd_RotorDiam.text()))) # Количество импульсов двигателя на один мм поверхности вращения
-        ic(imp_in_degree)
         rotation = int(self.lEd_ScanStepAngle.text())*imp_in_degree
-        ic(rotation)
 
-        for _ in range(10):
+        for _ in range(2):
+            # Выборка люфта сверху
+            self.SimpleStepLinear(speed=200, step=4*2010)
+            self.SimpleStepLinear(speed=200, step=-3*2010)
+
+            line = self.GetData()
+            shift = line[3]-start
+            print('Сдвиг выборки люфта:', shift)
+
+            # Парковка
+            print('Парковка по верхней границе...')
+            count = 0
+            while shift > 5 and count < 10:
+                time.sleep(0.5)
+                self.SimpleStepLinear(speed=100, step=-1*shift)
+                line = self.GetData()
+                shift = line[3]-start
+                count += 1
+            print('Сдвиг:', shift)
+            
             # Движение вниз
             self.ScanGeneratrix(steps=steps, step=step)
 
+            time.sleep(1)
             line = self.GetData()
-            ic(finish-line[3])
+            ic(line[3])
+            ic('Зазор снизу:', finish-line[3])
             
             # Шаг по окружности
-            realangle = self.SimpleStepRotor(speed=1, angle=rotation)
+            self.SimpleStepRotor(speed=1, angle=rotation)
 
+            line = self.GetData()
+            shift = finish - line[3]
+            print('Сдвиг после скана:', shift)
+
+            # Выборка люфта снизу
+            self.SimpleStepLinear(speed=200, step=-4*2010)
+            self.SimpleStepLinear(speed=200, step=3*2010)
+
+            line = self.GetData()
+            shift = finish-line[3]
+            print('Сдвиг выборки люфта:', shift)
+
+            # Парковка
+            print('Парковка по нижней границе')
+            count = 0
+            while shift > 5 and count < 10:
+                time.sleep(0.5)
+                self.SimpleStepLinear(speed=100, step=shift)
+                line = self.GetData()
+                shift = finish-line[3]
+                count += 1
+            print('Сдвиг:', shift)
+            
             # Движение вверх
             self.ScanGeneratrix(steps=steps, step=-1*step)
 
             # Шаг по окружности
-            realangle = self.SimpleStepRotor(speed=1, angle=rotation)
+            self.SimpleStepRotor(speed=1, angle=rotation)
 
+            time.sleep(1)
             line = self.GetData()
+            ic(line[3])
+            ic('Зазор сверху:', line[3]-start)
             shift = line[3]-start
-            print('Сдвиг после скана:', shift)
 
-            # Выборка люфта
-            # time.sleep(0.5)
-            realstep = abs(self.SimpleStepLinear(speed=100, step=4*step))
-            realstep = abs(self.SimpleStepLinear(speed=100, step=-3*step))
-
-            line = self.GetData()
-            shift = line[3]-start
-            print('Сдвиг после парковки:', shift)
-
-            # Парковка
-            print('Парковка по верхней границе')
-            count = 0
-            while shift > 5 and count < 10:
-                time.sleep(0.5)
-                realstep = abs(self.SimpleStepLinear(speed=100, step=-1*shift))
-                line = self.GetData()
-                shift = line[3]-start
-                print('Сдвиг:', shift)
-                count += 1
-
-        self.data.to_csv('data.csv')
+        filename = time.strftime("%Y-%m-%d_%H-%M")
+        self.data.to_csv(f"data_{filename}.csv")
 
     def ShowData(self) -> None:
         self.txtBrwser_ShowData.setText(str(self.GetData()))
