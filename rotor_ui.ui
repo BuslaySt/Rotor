@@ -40,7 +40,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab1_info">
        <attribute name="title">
@@ -594,7 +594,7 @@
       </widget>
       <widget class="QWidget" name="tab3_precise">
        <attribute name="title">
-        <string>Сверхточный режим</string>
+        <string>Точечный режим</string>
        </attribute>
        <widget class="QPushButton" name="tab3_pBtn1_Rotate">
         <property name="geometry">
@@ -638,9 +638,9 @@
        <widget class="QPushButton" name="tab3_pBtn5_Scan">
         <property name="geometry">
          <rect>
-          <x>210</x>
+          <x>100</x>
           <y>270</y>
-          <width>161</width>
+          <width>371</width>
           <height>111</height>
          </rect>
         </property>
@@ -793,7 +793,7 @@
          <rect>
           <x>10</x>
           <y>400</y>
-          <width>171</width>
+          <width>201</width>
           <height>81</height>
          </rect>
         </property>
@@ -801,7 +801,7 @@
        <widget class="QPushButton" name="pBtn_ShowData">
         <property name="geometry">
          <rect>
-          <x>190</x>
+          <x>220</x>
           <y>400</y>
           <width>151</width>
           <height>81</height>
@@ -886,17 +886,7 @@
       </widget>
       <widget class="QWidget" name="tab4_fast">
        <attribute name="title">
-        <string>Быстрый режим</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab5_normal">
-       <attribute name="title">
-        <string>Нормальный режим</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab6_result">
-       <attribute name="title">
-        <string>Результаты</string>
+        <string>Спиральный режим</string>
        </attribute>
       </widget>
      </widget>
