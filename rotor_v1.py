@@ -378,7 +378,7 @@ class MainUI(QMainWindow):
         imp_in_degree = round(360*91/(3.14159*int(self.lEd_RotorDiam.text()))) # Количество импульсов двигателя на один мм поверхности вращения
         rotation = int(self.lEd_ScanStepAngle.text())*imp_in_degree
 
-        for _ in range(2):
+        for _ in range(20):
             # Выборка люфта сверху
             self.SimpleStepLinear(speed=200, step=4*2010)
             self.SimpleStepLinear(speed=200, step=-3*2010)
@@ -448,7 +448,9 @@ class MainUI(QMainWindow):
         self.data.to_csv(f"data_{filename}.csv")
 
     def ShowData(self) -> None:
-        self.txtBrwser_ShowData.setText(str(self.GetData()))
+        line = self.GetData()
+        text = ''.join(['B = ', str(line[:3]), '\nZ = ', str(line[3:5]), '\nPhi=', str(line[5:7]), '\nT = ', str(line[7:])])
+        self.txtBrwser_ShowData.setText(text)
 
     def GetData(self) -> list:
         try:
