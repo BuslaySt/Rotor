@@ -8,7 +8,7 @@ import pandas as pd
 class MainUI(QMainWindow):
     def __init__(self):
         super(MainUI, self).__init__()
-        loadUi("rotor_ui.ui", self)
+        loadUi("rotor_ui_v1.ui", self)
 
         # Окно инициализации
         self.tab1_dateEdit.setDate(datetime.datetime.now())
@@ -261,7 +261,7 @@ class MainUI(QMainWindow):
         line = self.GetData()
         self.ZeroZ = int(line[3])
         self.ZeroPhi = float(line[5])
-        message = "".join(["Установлен нулевой отсчёт - ", str(self.ZeroZ), str(self.ZeroPhi)])
+        message = "".join(["Установлен нулевой отсчёт - ", str(self.ZeroZ), ' x ', str(self.ZeroPhi)])
         print(message)
         self.statusbar.showMessage(message)
 
@@ -334,7 +334,7 @@ class MainUI(QMainWindow):
         # 0x000A - задержка перед началом движения (10 мс), записывается по адресу 0x6206
         # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
         try:
-            self.instrumentRotor.write_registers(0x6200, [0x0041, step1, step2, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+            self.instrumentRotor.write_registers(0x6200, [0x0041, step1, step2, speed, 0x03E8, 0x03E8, 0x000A, 0x0010])
             time.sleep(1) # Пауза на устаканивание
             realrotation = self.GetData()[5]-PHI0
             print("Угол:", realrotation)
@@ -364,12 +364,14 @@ class MainUI(QMainWindow):
 
     def ScanGeneratrix(self, steps: int, step: int) -> None:
         GeneratrixScanStepData = pd.Series()
+        line = self.GetData()
+        self.data.loc[len(self.data)] = line
         for s in range(steps):
             realstep = abs(self.SimpleStepLinear(speed=100, step=-1*step))
             GeneratrixScanStepData.loc[len(GeneratrixScanStepData)] = realstep
             line = self.GetData()
             self.data.loc[len(self.data)] = line
-        ic('Среднее значение шага по образующей:', GeneratrixScanStepData.mean())
+        print('Среднее значение шага по образующей:', GeneratrixScanStepData.mean())
 
     def Scan(self) -> None:
         ''' Сканирование по образующей вниз и вверх от заданных границ '''
@@ -390,7 +392,7 @@ class MainUI(QMainWindow):
         imp_in_mm = round(360*imp_in_degree/(3.14159*int(self.lEd_RotorDiam.text()))) # Количество импульсов двигателя на один мм поверхности вращения
         rotation = int(self.lEd_ScanStepAngle.text())*imp_in_degree
 
-        for n in range(180*3):
+        for n in range(2):
             print('Проход номер', n)
             # Выборка люфта сверху
             self.SimpleStepLinear(speed=200, step=4*2010)
