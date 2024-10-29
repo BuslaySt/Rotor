@@ -28,9 +28,10 @@ class MainUI(QMainWindow):
 
         self.pBtn_UpperLimit.clicked.connect(self.SetUpperLimit)
         self.pBtn_LowerLimit.clicked.connect(self.SetLowerLimit)
+        self.pBtn_Center.clicked.connect(self.SetCenterZero)
 
         # Окно точного шагания
-        self.cBox_ScanStepGeneratrix.addItems(['0,5 мм', '1 мм', '2 мм'])
+        self.cBox_ScanStepGeneratrix.addItems(['0,5 мм', '1 мм', '2 мм','4 мм'])
         self.cBox_ScanStepGeneratrix.setCurrentIndex(1)
         self.LinearStep = 1000 # 1mm default
         self.cBox_ScanStepGeneratrix.currentIndexChanged.connect(self.SetupScanStepGeneratrix)
@@ -49,6 +50,8 @@ class MainUI(QMainWindow):
                 self.LinearStep = 1000
             case 2:
                 self.LinearStep = 2000
+            case 3:
+                self.LinearStep = 4000
         print('Задан шаг по образующей:', self.LinearStep, ' мкм')
 
     def Init(self) -> None:
@@ -254,6 +257,14 @@ class MainUI(QMainWindow):
         self.statusbar.showMessage(message)
         self.pBtn_LowerLimit.setText("".join(["Нижняя граница ротора: ", str(self.LowerLimit)]))
 
+    def SetCenterZero(self) -> None:
+        line = self.GetData()
+        self.ZeroZ = int(line[3])
+        self.ZeroPhi = float(line[5])
+        message = "".join(["Установлен нулевой отсчёт - ", str(self.ZeroZ), str(self.ZeroPhi)])
+        print(message)
+        self.statusbar.showMessage(message)
+
     def Step(self):
         step = round(int(self.lEd_Step.text())*2010/1000)
         speed = int(self.lEd_LinearSpeed.text()) 
@@ -297,7 +308,7 @@ class MainUI(QMainWindow):
         line = self.GetData()
         start = line[5]
         ic('Старт', start)
-        for _ in range(487):
+        for _ in range(360):
             realangle = self.SimpleStepRotor(speed=1, angle=rotation)
             rotationData.loc[len(rotationData)] = realangle
         line = self.GetData()
@@ -358,7 +369,7 @@ class MainUI(QMainWindow):
             GeneratrixScanStepData.loc[len(GeneratrixScanStepData)] = realstep
             line = self.GetData()
             self.data.loc[len(self.data)] = line
-        print(GeneratrixScanStepData.describe())
+        ic('Среднее значение шага по образующей:', GeneratrixScanStepData.mean())
 
     def Scan(self) -> None:
         ''' Сканирование по образующей вниз и вверх от заданных границ '''
@@ -366,19 +377,21 @@ class MainUI(QMainWindow):
 
         line = self.GetData()
         start = int(line[3])
-        distance = abs(self.LowerLimit-start)
-        ic(distance)
-        step = int(self.LinearStep*2010/1000)
-        ic(step)
+        distance = abs(start-self.LowerLimit) # Дистанция прохода по образующей в мкм
+        ic('Дистанция прохода по образующей в мкм', distance)
+        step = int(self.LinearStep*2010/1000) # Шаг вдоль образующей в импульсах двигателя
+        ic('Шаг вдоль образующей в импульсах двигателя', step)
         steps = round(distance/self.LinearStep) # Количество шагов на образующую
-        ic(steps)
-        finish = start - self.LinearStep*steps
-        ic(finish)
-        ic(finish-self.LowerLimit)
-        imp_in_degree = round(360*91/(3.14159*int(self.lEd_RotorDiam.text()))) # Количество импульсов двигателя на один мм поверхности вращения
+        ic('Количество шагов на образующую', steps)
+        finish = start - self.LinearStep*steps # Уточнённое значение нижнего лимита по образующей
+        ic('Уточнённое значение нижнего лимита по образующей', finish)
+        ic('Разница между лимитом и реальной дистанцией', finish-self.LowerLimit)
+        imp_in_degree = 100 # Количество импульсов двигателя на угловой градус
+        imp_in_mm = round(360*imp_in_degree/(3.14159*int(self.lEd_RotorDiam.text()))) # Количество импульсов двигателя на один мм поверхности вращения
         rotation = int(self.lEd_ScanStepAngle.text())*imp_in_degree
 
-        for _ in range(20):
+        for n in range(180*3):
+            print('Проход номер', n)
             # Выборка люфта сверху
             self.SimpleStepLinear(speed=200, step=4*2010)
             self.SimpleStepLinear(speed=200, step=-3*2010)
@@ -396,7 +409,7 @@ class MainUI(QMainWindow):
                 line = self.GetData()
                 shift = line[3]-start
                 count += 1
-            print('Сдвиг:', shift)
+            print('Сдвиг после парковки:', shift)
             
             # Движение вниз
             self.ScanGeneratrix(steps=steps, step=step)
@@ -463,7 +476,7 @@ class MainUI(QMainWindow):
             self.lbl_Data.setText(str(line))
             Bx = float(line[0][5:-3].replace(',','.'))
             By = float(line[1][4:-3].replace(',','.'))
-            Bz = float(line[2][5:-3].replace(',','.'))
+            Bz = float(line[2][4:-3].replace(',','.'))
             Z = int(line[3][3:-3].replace(',','.'))
             try:    Zerr = int(line[4][6:-3].replace(',','.'))
             except: Zerr = line[4][6:]
@@ -474,7 +487,9 @@ class MainUI(QMainWindow):
 
             return [Bx, By, Bz, Z, Zerr, PHI, PHIErr, T]
 
-        except ValueError as ve:             print("Error:", str(ve))
+        except ValueError as ve:
+            print("Error:", str(ve))
+            print(line)
         except serial.SerialException as se: print("Serial port error:", str(se))
         except Exception as e:               print("An error occurred:", str(e))
 
