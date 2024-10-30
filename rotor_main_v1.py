@@ -39,7 +39,7 @@ class MainUI(QMainWindow):
         self.tab3_pBtn1_Rotate.clicked.connect(self.Rotate)
         self.tab3_pBtn2_Step.clicked.connect(self.Step)
         self.tab3_pBtn3_Stop.clicked.connect(self.StopRotor)
-        self.tab3_pBtn5_Scan.clicked.connect(self.Scan)
+        self.pBtn_ScanGeneratrix.clicked.connect(self.Scan)
         self.pBtn_ShowData.clicked.connect(self.ShowData)
 
     def SetupScanStepGeneratrix(self, index: int) -> None:
@@ -116,6 +116,7 @@ class MainUI(QMainWindow):
             speed = int(self.lEd_RotorSpeed.text())
         except ValueError:
             speed = 1
+            self.lEd_RotorSpeed.setText('1')
             message = "Скорость задана неверно"
             print(message)
             self.statusbar.showMessage(message)
@@ -142,7 +143,8 @@ class MainUI(QMainWindow):
         try:
             speed = 65536-int(self.lEd_RotorSpeed.text())
         except ValueError:
-            speed = 65535
+            speed = 65536-1
+            self.lEd_RotorSpeed.setText('1')
             message = "Скорость задана неверно"
             print(message)
             self.statusbar.showMessage(message)
@@ -169,7 +171,8 @@ class MainUI(QMainWindow):
         try:
             speed = int(self.lEd_LinearSpeed.text())
         except ValueError:
-            speed = 200
+            speed = 100
+            self.lEd_LinearSpeed.setText('100')
             message = "Скорость задана неверно"
             print(message)
             self.statusbar.showMessage(message)
@@ -186,7 +189,7 @@ class MainUI(QMainWindow):
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x0064, 0x0064, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
@@ -194,27 +197,27 @@ class MainUI(QMainWindow):
 
     def LinearMotionUp(self) -> None:
         try:
-            speed = 65535-int(self.lEd_LinearSpeed.text())
+            speed = 65536-int(self.lEd_LinearSpeed.text())
         except ValueError:
-            speed = 65535-200
+            speed = 65536-100
+            self.lEd_LinearSpeed.setText('100')
             message = "Скорость задана неверно"
             print(message)
             self.statusbar.showMessage(message)
-
         try:
             # Формирование массива параметров для команды:
             # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
             # 0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
             # 0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
             # 0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
-            # 0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
-            # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
+            # 0x0064 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
+            # 0x0064 - значение времени торможения (1000 мс), записывается по адресу 0x6205
             # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
             # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x0064, 0x0064, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
@@ -266,11 +269,11 @@ class MainUI(QMainWindow):
         self.statusbar.showMessage(message)
 
     def Step(self):
-        step = round(int(self.lEd_Step.text())*2010/1000)
+        step = round(int(self.lEd_Step.text())*2005/1000)
         speed = int(self.lEd_LinearSpeed.text()) 
-        self.SimpleStepLinear(speed=speed, step=step)
+        print('Шаг на', self.SimpleStepLinear(speed=speed, step=step))
 
-    def SimpleStepLinear(self, speed=50, step=2010) -> int:
+    def SimpleStepLinear(self, speed=50, step=2005) -> int:
         ''' Простой шаг по образующей на заданное расстояние '''
         sleepStep = abs(step)/speed/100 # Время на паузу в сек, чтобы мотор успел прокрутиться
         if sleepStep < 0.5: sleepStep = 0.5
@@ -284,12 +287,12 @@ class MainUI(QMainWindow):
         # 0x0000 - верхние два байта кол-ва оборотов (=0 обычно), записывается по адресу 0x6201
         # 0x0000 - нижние два байта кол-ва оборотов  (=шаг), записывается по адресу 0x6202
         # 0x0000 - значение скорости вращения (об/мин), записывается по адресу 0x6203
-        # 0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
-        # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
+        # 0x0064 - значение времени ускорения (100 мс), записывается по адресу 0x6204
+        # 0x0064 - значение времени торможения (100 мс), записывается по адресу 0x6205
         # 0x000A - задержка перед началом движения (10 мс), записывается по адресу 0x6206
         # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
         try:
-            self.instrumentLinear.write_registers(0x6200, [0x0041, step1, step2, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+            self.instrumentLinear.write_registers(0x6200, [0x0041, step1, step2, speed, 0x0064, 0x0064, 0x0000, 0x0010])
             time.sleep(sleepStep) # Пауза, чтобы мотор успел прокрутиться
             realstep = self.GetData()[3]-Z0
             # ic("Шаг:", realstep)
@@ -302,7 +305,7 @@ class MainUI(QMainWindow):
         return realstep
 
     def Rotate(self):
-        ''' Полный оборот вокруг оси '''
+        ''' Полный оборот вокруг оси на 360'''
         rotationData = pd.Series()
         rotation = int(self.lEd_Rotation.text())
         line = self.GetData()
@@ -318,7 +321,7 @@ class MainUI(QMainWindow):
         rotationData = rotationData.loc[(rotationData>-10)&(rotationData<10)]
         print(rotationData.describe())
 
-    def SimpleStepRotor(self, speed=1, angle=67) -> int:
+    def SimpleStepRotor(self, speed=1, angle=100) -> int:
         ''' Простой поворот на заданный угол '''
         PHI0 = self.GetData()[5] # Запоминаем начальный угол
         if angle<0:
@@ -334,8 +337,8 @@ class MainUI(QMainWindow):
         # 0x000A - задержка перед началом движения (10 мс), записывается по адресу 0x6206
         # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
         try:
-            self.instrumentRotor.write_registers(0x6200, [0x0041, step1, step2, speed, 0x03E8, 0x03E8, 0x000A, 0x0010])
-            time.sleep(1) # Пауза на устаканивание
+            self.instrumentRotor.write_registers(0x6200, [0x0041, step1, step2, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+            time.sleep(2) # Пауза на поворот
             realrotation = self.GetData()[5]-PHI0
             print("Угол:", realrotation)
 
@@ -381,13 +384,13 @@ class MainUI(QMainWindow):
         start = int(line[3])
         distance = abs(start-self.LowerLimit) # Дистанция прохода по образующей в мкм
         ic('Дистанция прохода по образующей в мкм', distance)
-        step = int(self.LinearStep*2010/1000) # Шаг вдоль образующей в импульсах двигателя
+        step = int(self.LinearStep*2005/1000) # Шаг вдоль образующей в импульсах двигателя
         ic('Шаг вдоль образующей в импульсах двигателя', step)
         steps = round(distance/self.LinearStep) # Количество шагов на образующую
         ic('Количество шагов на образующую', steps)
         finish = start - self.LinearStep*steps # Уточнённое значение нижнего лимита по образующей
         ic('Уточнённое значение нижнего лимита по образующей', finish)
-        ic('Разница между лимитом и реальной дистанцией', finish-self.LowerLimit)
+        ic(finish-self.LowerLimit) #Разница между лимитом и реальной дистанцией
         imp_in_degree = 100 # Количество импульсов двигателя на угловой градус
         imp_in_mm = round(360*imp_in_degree/(3.14159*int(self.lEd_RotorDiam.text()))) # Количество импульсов двигателя на один мм поверхности вращения
         rotation = int(self.lEd_ScanStepAngle.text())*imp_in_degree
@@ -395,8 +398,8 @@ class MainUI(QMainWindow):
         for n in range(2):
             print('Проход номер', n)
             # Выборка люфта сверху
-            self.SimpleStepLinear(speed=200, step=4*2010)
-            self.SimpleStepLinear(speed=200, step=-3*2010)
+            self.SimpleStepLinear(speed=200, step=4*2005)
+            self.SimpleStepLinear(speed=200, step=-3*2005)
 
             line = self.GetData()
             shift = line[3]-start
@@ -416,7 +419,7 @@ class MainUI(QMainWindow):
             # Движение вниз
             self.ScanGeneratrix(steps=steps, step=step)
 
-            time.sleep(1)
+            time.sleep(5)
             line = self.GetData()
             ic(line[3])
             ic('Зазор снизу:', finish-line[3])
@@ -429,8 +432,8 @@ class MainUI(QMainWindow):
             print('Сдвиг после скана:', shift)
 
             # Выборка люфта снизу
-            self.SimpleStepLinear(speed=200, step=-4*2010)
-            self.SimpleStepLinear(speed=200, step=3*2010)
+            self.SimpleStepLinear(speed=200, step=-4*2005)
+            self.SimpleStepLinear(speed=200, step=3*2005)
 
             line = self.GetData()
             shift = finish-line[3]
@@ -453,7 +456,7 @@ class MainUI(QMainWindow):
             # Шаг по окружности
             self.SimpleStepRotor(speed=1, angle=rotation)
 
-            time.sleep(1)
+            time.sleep(5)
             line = self.GetData()
             ic(line[3])
             ic('Зазор сверху:', line[3]-start)
@@ -461,6 +464,8 @@ class MainUI(QMainWindow):
 
         filename = time.strftime("%Y-%m-%d_%H-%M")
         self.data.to_csv(f"data_{filename}.csv")
+        message = "Съёмка завершена!"
+        print(message)
 
     def ShowData(self) -> None:
         line = self.GetData()
