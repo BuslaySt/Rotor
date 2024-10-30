@@ -40,7 +40,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab1_info">
        <attribute name="title">
@@ -698,17 +698,17 @@
          <string>Шаг</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="tab3_pBtn5_Scan">
+       <widget class="QPushButton" name="pBtn_ScanGeneratrix">
         <property name="geometry">
          <rect>
-          <x>100</x>
+          <x>40</x>
           <y>270</y>
-          <width>371</width>
+          <width>211</width>
           <height>111</height>
          </rect>
         </property>
         <property name="text">
-         <string>Сканирование</string>
+         <string>Сканирование по образующей</string>
         </property>
        </widget>
        <widget class="QFrame" name="tab3_frame1">
@@ -914,7 +914,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>91</string>
+         <string>100</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -946,10 +946,31 @@
          <string>мкм</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="pBtn_ScanAround">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>290</x>
+          <y>270</y>
+          <width>211</width>
+          <height>111</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Сканирование по окружности</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tab4_fast">
        <attribute name="title">
         <string>Спиральный режим</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab5_result">
+       <attribute name="title">
+        <string>Page</string>
        </attribute>
       </widget>
      </widget>
