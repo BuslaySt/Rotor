@@ -269,11 +269,11 @@ class MainUI(QMainWindow):
         self.statusbar.showMessage(message)
 
     def Step(self):
-        step = round(int(self.lEd_Step.text())*2005/1000)
+        step = round(int(self.lEd_Step.text())*2000/1000)
         speed = int(self.lEd_LinearSpeed.text()) 
         print('Шаг на', self.SimpleStepLinear(speed=speed, step=step))
 
-    def SimpleStepLinear(self, speed=50, step=2005) -> int:
+    def SimpleStepLinear(self, speed=50, step=2000) -> int:
         ''' Простой шаг по образующей на заданное расстояние '''
         sleepStep = abs(step)/speed/100 # Время на паузу в сек, чтобы мотор успел прокрутиться
         if sleepStep < 0.5: sleepStep = 0.5
@@ -295,7 +295,7 @@ class MainUI(QMainWindow):
             self.instrumentLinear.write_registers(0x6200, [0x0041, step1, step2, speed, 0x0064, 0x0064, 0x0000, 0x0010])
             time.sleep(sleepStep) # Пауза, чтобы мотор успел прокрутиться
             realstep = self.GetData()[3]-Z0
-            # ic("Шаг:", realstep)
+            ic("Шаг:", realstep)
 
         except (IOError, AttributeError, ValueError):
             message = "Команда на линейный шаг не прошла"
@@ -384,7 +384,7 @@ class MainUI(QMainWindow):
         start = int(line[3])
         distance = abs(start-self.LowerLimit) # Дистанция прохода по образующей в мкм
         ic('Дистанция прохода по образующей в мкм', distance)
-        step = int(self.LinearStep*2005/1000) # Шаг вдоль образующей в импульсах двигателя
+        step = int(self.LinearStep*2000/1000) # Шаг вдоль образующей в импульсах двигателя
         ic('Шаг вдоль образующей в импульсах двигателя', step)
         steps = round(distance/self.LinearStep) # Количество шагов на образующую
         ic('Количество шагов на образующую', steps)
@@ -398,8 +398,8 @@ class MainUI(QMainWindow):
         for n in range(2):
             print('Проход номер', n)
             # Выборка люфта сверху
-            self.SimpleStepLinear(speed=200, step=4*2005)
-            self.SimpleStepLinear(speed=200, step=-3*2005)
+            self.SimpleStepLinear(speed=200, step=4*2000)
+            self.SimpleStepLinear(speed=200, step=-3*2000)
 
             line = self.GetData()
             shift = line[3]-start
@@ -432,8 +432,8 @@ class MainUI(QMainWindow):
             print('Сдвиг после скана:', shift)
 
             # Выборка люфта снизу
-            self.SimpleStepLinear(speed=200, step=-4*2005)
-            self.SimpleStepLinear(speed=200, step=3*2005)
+            self.SimpleStepLinear(speed=200, step=-4*2000)
+            self.SimpleStepLinear(speed=200, step=3*2000)
 
             line = self.GetData()
             shift = finish-line[3]
