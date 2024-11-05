@@ -40,7 +40,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab1_info">
        <attribute name="title">
@@ -669,7 +669,7 @@
               </size>
              </property>
              <property name="text">
-              <string>Задать ноль углового отсчёта</string>
+              <string>Задать ноль отсчёта измерений</string>
              </property>
             </widget>
            </item>
@@ -862,7 +862,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="tab5_lbl5_mm_2">
+          <widget class="QLabel" name="lbl_ScanStepAngleMM">
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -870,7 +870,7 @@
             </size>
            </property>
            <property name="text">
-            <string>1</string>
+            <string>0</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -901,11 +901,11 @@
          </item>
         </layout>
        </widget>
-       <widget class="QLineEdit" name="lEd_Pos">
+       <widget class="QLineEdit" name="lEd_Pos_Z">
         <property name="geometry">
          <rect>
-          <x>410</x>
-          <y>40</y>
+          <x>290</x>
+          <y>30</y>
           <width>101</width>
           <height>41</height>
          </rect>
@@ -920,9 +920,9 @@
        <widget class="QPushButton" name="pBtn_Position">
         <property name="geometry">
          <rect>
-          <x>410</x>
-          <y>90</y>
-          <width>101</width>
+          <x>310</x>
+          <y>80</y>
+          <width>181</width>
           <height>51</height>
          </rect>
         </property>
@@ -1003,6 +1003,61 @@
         </property>
         <property name="text">
          <string>Стоп</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lEd_Pos_PHI">
+        <property name="geometry">
+         <rect>
+          <x>430</x>
+          <y>30</y>
+          <width>101</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_coord">
+        <property name="geometry">
+         <rect>
+          <x>290</x>
+          <y>10</y>
+          <width>221</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Координаты позиционирования:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_coord_2">
+        <property name="geometry">
+         <rect>
+          <x>270</x>
+          <y>40</y>
+          <width>21</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Z=</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_coord_3">
+        <property name="geometry">
+         <rect>
+          <x>400</x>
+          <y>40</y>
+          <width>21</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Phi=</string>
         </property>
        </widget>
       </widget>
