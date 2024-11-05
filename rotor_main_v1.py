@@ -295,7 +295,7 @@ class MainUI(QMainWindow):
             self.instrumentLinear.write_registers(0x6200, [0x0041, step1, step2, speed, 0x0064, 0x0064, 0x0000, 0x0010])
             time.sleep(sleepStep) # Пауза, чтобы мотор успел прокрутиться
             realstep = self.GetData()[3]-Z0
-            ic("Шаг:", realstep)
+            # ic("Шаг:", realstep)
 
         except (IOError, AttributeError, ValueError):
             message = "Команда на линейный шаг не прошла"
@@ -376,7 +376,95 @@ class MainUI(QMainWindow):
             self.data.loc[len(self.data)] = line
         print('Среднее значение шага по образующей:', GeneratrixScanStepData.mean())
 
+
     def Scan(self) -> None:
+        ''' Сканирование по образующей вниз и вверх от заданных границ '''
+        self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T'])
+
+        line = self.GetData()
+        start = int(line[3])
+        distance = abs(start-self.LowerLimit) # Дистанция прохода по образующей в мкм
+        step = int(self.LinearStep*2000/1000) # Шаг вдоль образующей в импульсах двигателя
+        steps = round(distance/self.LinearStep) # Количество шагов на образующую
+        finish = start - self.LinearStep*steps # Уточнённое значение нижнего лимита по образующей
+        ic('Уточнённое значение нижнего лимита по образующей', finish)
+        imp_in_degree = 100 # Количество импульсов двигателя на угловой градус
+        imp_in_mm = round(360*imp_in_degree/(3.14159*int(self.lEd_RotorDiam.text()))) # Количество импульсов двигателя на один мм поверхности вращения
+        rotation = int(self.lEd_ScanStepAngle.text())*imp_in_degree
+
+        for n in range(5):
+            print('Проход номер', n)
+            # Выборка люфта сверху
+            self.SimpleStepLinear(speed=100, step=4000)
+            self.SimpleStepLinear(speed=100, step=-3000)
+
+            line = self.GetData()
+            shift = line[3]-start
+            print('Сдвиг выборки люфта:', shift)
+
+            # Парковка
+            print('Парковка по верхней границе...')
+            count = 0
+            while shift > 2 and count < 10:
+                time.sleep(0.5)
+                self.SimpleStepLinear(speed=100, step=-1*int(shift*1.9))
+                line = self.GetData()
+                shift = line[3]-start
+                ic('Сдвиг', shift)
+                count += 1
+            print('Итоговый сдвиг:', shift)
+            
+            # Движение вниз
+            self.ScanGeneratrix(steps=steps, step=step)
+
+            # Шаг по окружности
+            self.SimpleStepRotor(speed=1, angle=rotation)
+
+            # line = self.GetData()
+            # shift = finish - line[3]
+            # print('Зазор снизу после скана:', shift)
+
+            # Выборка люфта снизу
+            self.SimpleStepLinear(speed=100, step=-4000)
+            self.SimpleStepLinear(speed=100, step=3000)
+
+            line = self.GetData()
+            shift = finish-line[3]
+            # print('Сдвиг выборки люфта:', shift)
+
+            # Парковка
+            print('Парковка по нижней границе')
+            count = 0
+            while shift > 2 and count < 10:
+                time.sleep(0.5)
+                self.SimpleStepLinear(speed=100, step=int(shift*1.9))
+                line = self.GetData()
+                shift = finish-line[3]
+                ic('Сдвиг', shift)
+                count += 1
+            print('Итоговый сдвиг:', shift)
+            
+            # Движение вверх
+            self.ScanGeneratrix(steps=steps, step=-1*step)
+
+            time.sleep(3)
+
+            # Шаг по окружности
+            self.SimpleStepRotor(speed=1, angle=rotation)
+
+            line = self.GetData()
+            ic('Верхняя координата', line[3])
+            shift = line[3]-start
+            ic('Зазор сверху:', shift)
+
+
+        filename = time.strftime("%Y-%m-%d_%H-%M")
+        self.data.to_csv(f"data_{filename}.csv")
+        message = "Съёмка завершена!"
+        print(message)
+
+
+    def Scan2(self) -> None:
         ''' Сканирование по образующей вниз и вверх от заданных границ '''
         self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T'])
 
