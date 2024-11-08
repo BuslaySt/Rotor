@@ -258,7 +258,7 @@
               </size>
              </property>
              <property name="text">
-              <string>139,0</string>
+              <string>139.0</string>
              </property>
             </widget>
            </item>
@@ -305,6 +305,11 @@
                <width>200</width>
                <height>50</height>
               </size>
+             </property>
+             <property name="font">
+              <font>
+               <italic>false</italic>
+              </font>
              </property>
              <property name="text">
               <string>Инициализация двигателей</string>
@@ -468,7 +473,7 @@
            <item>
             <widget class="QLabel" name="lbl_Data">
              <property name="text">
-              <string>Данные с датчиков</string>
+              <string>Прямые данные с датчиков</string>
              </property>
             </widget>
            </item>
@@ -476,7 +481,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="tab2_frame4">
+         <widget class="QFrame" name="tab2_frame4_Rotate">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -522,7 +527,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="tab2_frame5_move">
+         <widget class="QFrame" name="tab2_frame5_MoveZ">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -580,7 +585,60 @@
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="tab2_frame6_Limits">
+         <widget class="QFrame" name="tab2_frame6_Zero">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>70</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>70</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_14">
+           <item>
+            <widget class="QPushButton" name="pBtn_ZeroPhi">
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Задать ноль вращения Phi</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pBtn_ZeroZ">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Задать ноль образующей Z</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="tab2_frame7_Limits">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -623,59 +681,6 @@
              </property>
              <property name="text">
               <string>Нижняя граница ротора</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="tab2_frame7_center">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>70</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>70</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_14">
-           <item>
-            <widget class="QPushButton" name="pBtn_Center">
-             <property name="minimumSize">
-              <size>
-               <width>300</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Задать ноль вращения</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pBtn_Center_2">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>300</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Задать ноль образующей</string>
              </property>
             </widget>
            </item>
@@ -909,14 +914,15 @@
        <widget class="QPushButton" name="pBtn_Position">
         <property name="geometry">
          <rect>
-          <x>40</x>
+          <x>10</x>
           <y>130</y>
-          <width>121</width>
+          <width>151</width>
           <height>51</height>
          </rect>
         </property>
         <property name="text">
-         <string>Перевести в начало</string>
+         <string>Перевести каретку
+в начало</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pBtn_ScanAround">
@@ -993,7 +999,7 @@
        <widget class="QLabel" name="lbl_coord_4">
         <property name="geometry">
          <rect>
-          <x>180</x>
+          <x>210</x>
           <y>10</y>
           <width>161</width>
           <height>16</height>
@@ -1005,11 +1011,11 @@
        </widget>
        <widget class="QLineEdit" name="lEd_Range_PHI">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="geometry">
          <rect>
-          <x>210</x>
+          <x>240</x>
           <y>30</y>
           <width>101</width>
           <height>41</height>
@@ -1024,18 +1030,18 @@
        </widget>
        <widget class="QLineEdit" name="lEd_Range_Z">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="geometry">
          <rect>
-          <x>210</x>
+          <x>240</x>
           <y>80</y>
           <width>101</width>
           <height>41</height>
          </rect>
         </property>
         <property name="text">
-         <string>139</string>
+         <string>139.0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1044,7 +1050,7 @@
        <widget class="QLabel" name="lbl_Range_PHI">
         <property name="geometry">
          <rect>
-          <x>180</x>
+          <x>210</x>
           <y>40</y>
           <width>31</width>
           <height>16</height>
@@ -1057,7 +1063,7 @@
        <widget class="QLabel" name="lbl_Range_Z">
         <property name="geometry">
          <rect>
-          <x>170</x>
+          <x>200</x>
           <y>90</y>
           <width>41</width>
           <height>20</height>
@@ -1070,7 +1076,7 @@
        <widget class="QLabel" name="tab3_lbl_degree">
         <property name="geometry">
          <rect>
-          <x>320</x>
+          <x>350</x>
           <y>30</y>
           <width>15</width>
           <height>30</height>
@@ -1098,7 +1104,7 @@
        <widget class="QLabel" name="lbl_tab3_mm1">
         <property name="geometry">
          <rect>
-          <x>320</x>
+          <x>350</x>
           <y>90</y>
           <width>21</width>
           <height>20</height>
@@ -1106,6 +1112,47 @@
         </property>
         <property name="text">
          <string>мм</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_tab3_mm1_2">
+        <property name="geometry">
+         <rect>
+          <x>150</x>
+          <y>90</y>
+          <width>21</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>мкм</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="tab3_lbl_degree_2">
+        <property name="geometry">
+         <rect>
+          <x>150</x>
+          <y>30</y>
+          <width>15</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>15</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>15</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>°</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
       </widget>
