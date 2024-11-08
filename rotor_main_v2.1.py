@@ -10,10 +10,15 @@ class MainUI(QMainWindow):
         super(MainUI, self).__init__()
         loadUi("rotor_ui_v2.1.ui", self)
 
-        # Окно инициализации
+        self.ZeroPhi = 0
+        self.ZeroZ = 0
+
+        # Окно информации
         self.tab1_dateEdit.setDate(datetime.datetime.now())
         self.tab1_dateEdit.setCalendarPopup(True)
         self.tab1_timeEdit.setTime(datetime.datetime.now().time())
+        self.lEd_RotorLen.textChanged.connect(self.SetScanHeight)
+
         # Окно настроек
         self.pBtn_Init.clicked.connect(self.Init)
         self.pBtn_RotateCW.pressed.connect(self.RotateCW)
@@ -26,9 +31,11 @@ class MainUI(QMainWindow):
         self.pBtn_MoveDown.pressed.connect(self.LinearMotionDown)
         self.pBtn_MoveDown.released.connect(self.StopLinear)
 
+        self.pBtn_ZeroPhi.clicked.connect(self.SetZeroPhi)
+        self.pBtn_ZeroZ.clicked.connect(self.SetZeroZ)
+
         self.pBtn_UpperLimit.clicked.connect(self.SetUpperLimit)
         self.pBtn_LowerLimit.clicked.connect(self.SetLowerLimit)
-        self.pBtn_Center.clicked.connect(self.SetCenterZero)
 
         # Окно точного шагания
         self.cBox_ScanStepGeneratrix.addItems(['0,5 мм', '1 мм', '2 мм','4 мм'])
@@ -39,6 +46,10 @@ class MainUI(QMainWindow):
         self.lEd_ScanStepAngle.textChanged.connect(self.Angle2MM)
         self.pBtn_ScanGeneratrix.clicked.connect(self.Scan)
         self.pBtn_ShowData.clicked.connect(self.ShowData)
+
+    def SetScanHeight(self) -> None:
+        ''' Введённая высота ротора записывается как высота области сканирования '''
+        self.lEd_Range_Z.setText(self.lEd_RotorLen.text())
 
     def SetupScanStepGeneratrix(self, index: int) -> None:
         match index:
@@ -254,11 +265,11 @@ class MainUI(QMainWindow):
 
     def AbsPositioning(self) -> None:
         Zpos = int(self.lEd_Pos_Z.text())
-        self.LinearPositioning(Zpos)
+        self.LinearPositioning(Zpos+self.ZeroZ)
         PHIpos = round(float(self.lEd_Pos_PHI.text()), 3)
-        self.AngularPositioning(PHIpos)
+        self.AngularPositioning(PHIpos + self.ZeroPhi)
         line = self.GetData()
-        print('Приехали в точку: Z=', line[3], ' Phi=', line[5])
+        print('Приехали в точку: Z=', line[3]-self.ZeroZ, ' Phi=', line[5]-self.ZeroPhi)
 
     def LinearPositioning(self, Zpos: int) -> None:
         ''' Перемещение каретки в заданную координату Zpos '''
@@ -300,13 +311,17 @@ class MainUI(QMainWindow):
         self.statusbar.showMessage(message)
         self.pBtn_LowerLimit.setText("".join(["Нижняя граница ротора: ", str(self.LowerLimit)]))
 
-    def SetCenterZero(self) -> None:
+    def SetZeroPhi(self) -> None:
+        line = self.GetData()
+        self.ZeroPhi = float(line[5])
+        message = "Установлено начало координат по вращению."
+        print(message)
+        self.statusbar.showMessage(message)
+
+    def SetZeroZ(self) -> None:
         line = self.GetData()
         self.ZeroZ = int(line[3])
-        self.lEd_Pos_Z.setText(str(self.ZeroZ))
-        self.ZeroPhi = float(line[5])
-        self.lEd_Pos_PHI.setText(str(self.ZeroPhi))
-        message = "".join(["Установлен нулевой отсчёт - ", str(self.ZeroZ), ' x ', str(self.ZeroPhi)])
+        message = "Установлено начало координат по образующей."
         print(message)
         self.statusbar.showMessage(message)
 
@@ -436,26 +451,70 @@ class MainUI(QMainWindow):
         self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T'])
 
         line = self.GetData()
-        start = int(line[3])
-        distance = abs(start-self.LowerLimit) # Дистанция прохода по образующей в мкм
-        step = int(self.LinearStep*2000/1000) # Шаг вдоль образующей в импульсах двигателя
+
+        self.AbsPositioning()
+
+        start = round(float(self.lEd_Pos_Z.text())*1000) # Координаты точки начала измерений по Z, в мкм
+        
+        distance = abs(start+round(float(self.lEd_Range_Z.text())*1000) ) # Дистанция прохода по образующей в мкм
+        
+        step = int(self.LinearStep*2000/1000) # Шаг вдоль образующей в импульсах двигателя (2000 имп/мм)
+        
         steps = round(distance/self.LinearStep) # Количество шагов на образующую
-        finish = start - self.LinearStep*steps # Уточнённое значение нижнего лимита по образующей
-        ic('Уточнённое значение нижнего лимита по образующей', finish)
+        
+        finish = start + self.LinearStep*steps # Уточнённое значение нижнего лимита по образующей
+        
+        ic('Уточнённое значение верхней границы измерений по образующей', finish)
+        
         # imp_in_degree = int(self.lEd_Rotation.text()) # Количество импульсов двигателя на угловой градус
         imp_in_degree = 100 # Количество импульсов двигателя на угловой градус
         # imp_in_mm = round(360*imp_in_degree/(3.14159*int(self.lEd_RotorDiam.text()))) # Количество импульсов двигателя на один мм поверхности вращения
         rotation = round(float(self.lEd_ScanStepAngle.text())*imp_in_degree)
 
-        NumberOfRuns = 5
+        NumberOfRuns = round(float(self.lEd_Range_PHI.text())/2)
+        ic(NumberOfRuns)
         for n in range(NumberOfRuns):
             print('Проход номер', n)
+
+            # Выборка люфта снизу
+            self.SimpleStepLinear(speed=100, step=-4000)
+            self.SimpleStepLinear(speed=100, step=3000)
+
+            line = self.GetData()
+            shift = start-line[3]
+            print('Сдвиг выборки люфта:', shift)
+
+            # Парковка
+            print('Парковка по нижней границе')
+            count = 0
+            while shift > 2 and count < 5:
+                time.sleep(0.5)
+                self.SimpleStepLinear(speed=100, step=int(shift*1.9))
+                line = self.GetData()
+                shift = start-line[3]
+                print('Сдвиг выборки люфта:', shift)
+                count += 1
+            print('Итоговый сдвиг:', shift)
+            
+            # Движение вверх
+            self.ScanGeneratrix(steps=steps, step=-step)
+
+            # Шаг по окружности
+            print('Поворот на угол - ', self.SimpleStepRotor(speed=1, angle=rotation))
+
+            time.sleep(1)
+
+            line = self.GetData()
+            print('Верхняя координата', line[3])
+            shift = line[3]-finish
+            print('Зазор сверху:', shift)
+
             # Выборка люфта сверху
             self.SimpleStepLinear(speed=100, step=4000)
             self.SimpleStepLinear(speed=100, step=-3000)
 
             line = self.GetData()
-            shift = line[3]-start
+            shift = line[3]-finish
             # print('Сдвиг выборки люфта:', shift)
 
             # Парковка
@@ -465,7 +524,7 @@ class MainUI(QMainWindow):
                 time.sleep(0.5)
                 self.SimpleStepLinear(speed=100, step=-1*int(shift*1.9))
                 line = self.GetData()
-                shift = line[3]-start
+                shift = line[3]-finish
                 count += 1
             print('Итоговый сдвиг:', shift)
             
@@ -481,39 +540,6 @@ class MainUI(QMainWindow):
             print('Нижняя координата', line[3])
             shift = finish-line[3]
             print('Зазор снизу:', shift)
-
-            # Выборка люфта снизу
-            self.SimpleStepLinear(speed=100, step=-4000)
-            self.SimpleStepLinear(speed=100, step=3000)
-
-            line = self.GetData()
-            shift = finish-line[3]
-            # print('Сдвиг выборки люфта:', shift)
-
-            # Парковка
-            print('Парковка по нижней границе')
-            count = 0
-            while shift > 2 and count < 5:
-                time.sleep(0.5)
-                self.SimpleStepLinear(speed=100, step=int(shift*1.9))
-                line = self.GetData()
-                shift = finish-line[3]
-                count += 1
-            print('Итоговый сдвиг:', shift)
-            
-            # Движение вверх
-            self.ScanGeneratrix(steps=steps, step=-1*step)
-
-            # Шаг по окружности
-            print('Поворот на угол - ', self.SimpleStepRotor(speed=1, angle=rotation))
-
-            time.sleep(1)
-
-            line = self.GetData()
-            print('Верхняя координата', line[3])
-            shift = line[3]-start
-            print('Зазор сверху:', shift)
-
 
         filename = time.strftime("%Y-%m-%d_%H-%M")
         self.data.to_csv(f"data_{filename}.csv")
