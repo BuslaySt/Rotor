@@ -639,6 +639,9 @@
         </item>
         <item>
          <widget class="QFrame" name="tab2_frame7_Limits">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -660,6 +663,9 @@
           <layout class="QHBoxLayout" name="horizontalLayout_12">
            <item>
             <widget class="QPushButton" name="pBtn_UpperLimit">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -673,6 +679,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="pBtn_LowerLimit">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -680,7 +689,7 @@
               </size>
              </property>
              <property name="text">
-              <string>Нижняя граница ротора</string>
+              <string>Точный шаг на 1 градус</string>
              </property>
             </widget>
            </item>
@@ -808,7 +817,7 @@
             </size>
            </property>
            <property name="text">
-            <string>1</string>
+            <string>1.00</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -864,7 +873,7 @@
             </size>
            </property>
            <property name="text">
-            <string>0</string>
+            <string>1.353</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -905,7 +914,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>0</string>
+         <string>0.000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -951,7 +960,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>0</string>
+         <string>0.000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1022,7 +1031,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>360</string>
+         <string>360.000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1041,7 +1050,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>139.0</string>
+         <string>100.000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1124,7 +1133,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>мкм</string>
+         <string>мм</string>
         </property>
        </widget>
        <widget class="QLabel" name="tab3_lbl_degree_2">
@@ -1157,11 +1166,17 @@
        </widget>
       </widget>
       <widget class="QWidget" name="tab4_fast">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <attribute name="title">
         <string>Спиральный режим</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tab5_result">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <attribute name="title">
         <string>Результат</string>
        </attribute>
