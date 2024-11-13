@@ -434,7 +434,7 @@ class MainUI(QMainWindow):
             count += 1
         
         line = self.GetData()
-        realrotation = round((line[5] - PHI0/100), 2) # На сколько реально прокрутился ротор
+        realrotation = round((line[5] - PHI0/100)%360, 2) # На сколько реально прокрутился ротор
         return realrotation
 
     def StopRotor(self) -> None:
@@ -463,7 +463,7 @@ class MainUI(QMainWindow):
         GeneratrixScanStepData = pd.Series()
         line = self.GetData()
         line[3] = round(line[3] - self.ZeroZ)
-        line[5] = round(line[5] - self.ZeroPhi, 3)
+        line[5] = round(line[5] - self.ZeroPhi, 3)%360
         self.data.loc[len(self.data)] = line
         step *= -1 # Меняем знак, потому что ось двигателя и ось энкодера разнонаправлены
         gap = 0
@@ -474,7 +474,7 @@ class MainUI(QMainWindow):
             GeneratrixScanStepData.loc[len(GeneratrixScanStepData)] = realstep
             line = self.GetData()
             line[3] = round(line[3] - self.ZeroZ)
-            line[5] = round(line[5] - self.ZeroPhi, 3)
+            line[5] = round(line[5] - self.ZeroPhi, 3)%360
             self.data.loc[len(self.data)] = line
         print('Среднее значение шага по образующей:', GeneratrixScanStepData.mean())
 
@@ -519,7 +519,6 @@ class MainUI(QMainWindow):
                 line = self.GetData()
                 shift = start-line[3]
                 count += 1
-            print('Итоговый сдвиг:', shift)
             
             # Движение вверх
             self.ScanGeneratrix(steps=steps, step=-step)
@@ -527,7 +526,6 @@ class MainUI(QMainWindow):
             # Шаг по окружности
             realrotation = self.PresizeStepRotor(speed=1, angle=(rotation+rotationgap))
             rotationgap = round(rotation - realrotation*100 + rotationgap)
-            ic(rotationgap)
             print('Поворот на угол - ', realrotation)
 
             time.sleep(1)
@@ -558,7 +556,6 @@ class MainUI(QMainWindow):
             # Шаг по окружности
             realrotation = self.PresizeStepRotor(speed=1, angle=(rotation+rotationgap))
             rotationgap = round(rotation - realrotation*100 + rotationgap)
-            ic(rotationgap)
             print('Поворот на угол - ', realrotation)
             
             time.sleep(1)
