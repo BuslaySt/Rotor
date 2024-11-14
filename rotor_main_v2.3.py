@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.uic import loadUi
-import sys, datetime, time
+import sys, datetime, time, json
 import minimalmodbus, serial
-from icecream import ic
+
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.offline as offline
@@ -10,10 +10,23 @@ import plotly.offline as offline
 class MainUI(QMainWindow):
     def __init__(self):
         super(MainUI, self).__init__()
-        loadUi("rotor_ui_v2.2.ui", self)
+        loadUi("rotor_ui_v2.3.ui", self)
 
-        self.ZeroPhi = 0
-        self.ZeroZ = 0
+        try:
+            with open('config.json', 'r') as config_file: 
+                config_data = json.load(config_file)
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            print('Файл конфига повреждён или отсутствует')
+            config_data = {
+                'Date': '01.11.2024',
+                'Time': '12:12',
+                'FIO': 'Имя Фамилия',
+                'RtrName': 'RotorName',
+                'RtrNumber': 'RotorNunber',
+                'RtrDiam': 155,
+                'RtrHght': 140,
+                'ZeroPhi': 0,
+                'ZeroZ': 0}
 
         self.pBtn_SaveConfig.clicked.connect(self.SaveConfig)
         
@@ -21,8 +34,16 @@ class MainUI(QMainWindow):
         self.tab1_dateEdit.setDate(datetime.datetime.now())
         self.tab1_dateEdit.setCalendarPopup(True)
         self.tab1_timeEdit.setTime(datetime.datetime.now().time())
+        self.tab1_lEd_FIO.setText(str(config_data['FIO']))
+        self.tab1_lEd_RotorName.setText(str(config_data['RtrName']))
+        self.tab1_lEd_RotorNum.setText(str(config_data['RtrNumber']))
+        self.lEd_RotorDiam.setText(str(config_data['RtrDiam']))
+        self.lEd_RotorHght.setText(str(config_data['RtrHght']))
+        self.ZeroPhi = config_data['ZeroPhi']
+        self.ZeroZ = config_data['ZeroZ']
+
         self.lEd_RotorDiam.textChanged.connect(self.Angle2MM)
-        self.lEd_RotorLen.textChanged.connect(self.SetScanHeight)
+        self.lEd_RotorHght.textChanged.connect(self.SetScanHeight)
         
         # Окно настроек
         self.pBtn_Init.clicked.connect(self.Init)
@@ -57,7 +78,7 @@ class MainUI(QMainWindow):
 
     def SetScanHeight(self) -> None:
         ''' Введённая высота ротора записывается как высота области сканирования '''
-        self.lEd_Range_Z.setText(self.lEd_RotorLen.text())
+        self.lEd_Range_Z.setText(self.lEd_RotorHght.text())
 
     def SetupScanStepGeneratrix(self, index: int) -> None:
         match index:
@@ -252,7 +273,6 @@ class MainUI(QMainWindow):
     def AbsMotion(self) -> None:
         ''' Перемещение в заданные координаты в системе двигателя'''
         coord1, coord2 = divmod(int(self.lEd_Pos.text()), 0x10000)
-        ic(hex(coord1), hex(coord2))
         try:
             # Формирование массива параметров для команды:
             # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
@@ -363,7 +383,6 @@ class MainUI(QMainWindow):
             self.instrumentLinear.write_registers(0x6200, [0x0041, step1, step2, speed, 0x0064, 0x0064, 0x0000, 0x0010])
             time.sleep(sleepStep) # Пауза, чтобы мотор успел прокрутиться
             realstep = self.GetData()[3]-Z0
-            # ic("Шаг:", realstep)
 
         except (IOError, AttributeError, ValueError):
             message = "Команда на линейный шаг не прошла"
@@ -378,17 +397,13 @@ class MainUI(QMainWindow):
         rotation = int(self.lEd_Rotation.text())
         line = self.GetData()
         start = line[5]
-        ic('Старт', start)
         for _ in range(5):
             time1 = time.time()
             realangle = self.SimpleStepRotor(speed=1, angle=rotation)
             rotationData.loc[len(rotationData)] = realangle
             time2 = time.time()
-            ic(time2-time1)
         line = self.GetData()
         finish = line[5]
-        ic('Финиш:', finish)
-        ic('Оборот:', finish-start)
         rotationData = rotationData.loc[(rotationData>-10)&(rotationData<10)]
         print(rotationData.describe())
 
@@ -646,6 +661,20 @@ class MainUI(QMainWindow):
         #self.view.load(QUrl.fromLocalFile(self.filename))
         #self.setCentralWidget(self.view)
 
+    def SaveConfig(self) -> None:
+        print(self.tab1_dateEdit.text())
+        config_data = {
+            'Date': self.tab1_dateEdit.text(),
+            'Time': self.tab1_timeEdit.text(),
+            'FIO': self.tab1_lEd_FIO.text(),
+            'RtrName': self.tab1_lEd_RotorName.text(),
+            'RtrNumber': self.tab1_lEd_RotorNum.text(),
+            'RtrDiam': self.lEd_RotorDiam.text(),
+            'RtrHght': self.lEd_RotorHght.text(),
+            'ZeroPhi': self.ZeroPhi,
+            'ZeroZ': self.ZeroZ}
+        with open('config.json', 'w') as config_file: 
+            json.dump(config_data, config_file)
 
 if __name__ == '__main__':
     from PyQt5.QtWebEngineWidgets import QWebEngineView # нашел рекомендацию этот импорт делать тут
