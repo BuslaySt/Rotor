@@ -1,7 +1,9 @@
+from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.uic import loadUi
 import sys, datetime, time, json
 import minimalmodbus, serial
+import serial.tools.list_ports
 
 import pandas as pd
 import plotly.graph_objs as go
@@ -12,24 +14,32 @@ class MainUI(QMainWindow):
         super(MainUI, self).__init__()
         loadUi("rotor_ui_v2.3.ui", self)
 
-        try:
+        try:     # Загрузка параметров из файла конфигурации
             with open('config.json', 'r') as config_file: 
                 config_data = json.load(config_file)
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
-            print('Файл конфига повреждён или отсутствует')
-            config_data = {
+        except (FileNotFoundError):
+            print('Файл конфигурации повреждён или отсутствует')
+            config_data = {     # Если файл конфигурации не подгрузился, берутся значения для подстановки
                 'Date': '01.11.2024',
                 'Time': '12:12',
                 'FIO': 'Имя Фамилия',
                 'RtrName': 'RotorName',
-                'RtrNumber': 'RotorNunber',
+                'RtrNumber': 'RotorNumber',
                 'RtrDiam': 155,
                 'RtrHght': 140,
                 'ZeroPhi': 0,
                 'ZeroZ': 0}
-
         self.pBtn_SaveConfig.clicked.connect(self.SaveConfig)
-        
+
+        # ---------- Serial ports ----------
+        portList = serial.tools.list_ports.comports(include_links=False)
+        self.comPorts = []
+        for item in portList:
+            self.comPorts.append(item.device)
+        message = "Доступные COM-порты: " + str(self.comPorts)
+        print(message)
+        self.statusbar.showMessage(message)
+
         # Окно информации
         self.tab1_dateEdit.setDate(datetime.datetime.now())
         self.tab1_dateEdit.setCalendarPopup(True)
@@ -46,7 +56,17 @@ class MainUI(QMainWindow):
         self.lEd_RotorHght.textChanged.connect(self.SetScanHeight)
         
         # Окно настроек
+        self.cBox_PortMotor.addItems(self.comPorts)
+        self.cBox_PortMotor.setCurrentIndex(0)
+        self.cBox_PortData.addItems(self.comPorts)
+        self.cBox_PortData.setCurrentIndex(1)
         self.pBtn_Init.clicked.connect(self.Init)
+
+        self.lEd_LinearSpeed.setValidator(QIntValidator())
+        self.lEd_LinearSpeed.editingFinished.connect(self.CheckLinSpeed)
+        self.lEd_RotorSpeed.setValidator(QIntValidator())
+        self.lEd_RotorSpeed.editingFinished.connect(self.CheckRotSpeed)
+
         self.pBtn_RotateCW.pressed.connect(self.RotateCW)
         self.pBtn_RotateCW.released.connect(self.StopRotor)
         self.pBtn_RotateCCW.pressed.connect(self.RotateCCW)
@@ -60,8 +80,8 @@ class MainUI(QMainWindow):
         self.pBtn_ZeroPhi.clicked.connect(self.SetZeroPhi)
         self.pBtn_ZeroZ.clicked.connect(self.SetZeroZ)
 
-        # self.pBtn_UpperLimit.clicked.connect(self.SetUpperLimit)
-        self.pBtn_LowerLimit.clicked.connect(self.PresizeStepRotor)
+        self.pBtn_Step.clicked.connect(self.Step)
+        self.pBtn_Turn.clicked.connect(self.PresizeStepRotor)
 
         # Окно точного шагания
         self.cBox_ScanStepGeneratrix.addItems(['0,5 мм', '1 мм', '2 мм','4 мм'])
@@ -75,6 +95,50 @@ class MainUI(QMainWindow):
 
         # Окно вывода результатов
         self.pBtn_Result.clicked.connect(self.ShowGraph)
+
+    def CheckLinSpeed(self):
+        speed = self.lEd_LinearSpeed.text()
+        try:
+            speed = int(speed)
+            if speed > 200:
+                message = "Не задавайте скорость каретки более 200"
+                print(message)
+                self.statusbar.showMessage(message)
+                speed = 200
+            elif speed <=0:
+                message = "Введите целое положительное число"
+                print(message)
+                self.statusbar.showMessage(message)
+                speed = 1
+        except ValueError:
+            speed = 100
+            message = "Введите целое положительное число"
+            print(message)
+            self.statusbar.showMessage(message)
+        finally:
+            self.lEd_LinearSpeed.setText(str(speed))
+
+    def CheckRotSpeed(self):
+        speed = self.lEd_RotorSpeed.text()
+        try:
+            speed = int(speed)
+            if speed > 5:
+                message = "Не задавайте скорость вращения более 5 об/мин"
+                print(message)
+                self.statusbar.showMessage(message)
+                speed = 5
+            elif speed <=0:
+                message = "Введите целое положительное число"
+                print(message)
+                self.statusbar.showMessage(message)
+                speed = 1
+        except ValueError:
+            speed = 1
+            message = "Введите целое положительное число"
+            print(message)
+            self.statusbar.showMessage(message)
+        finally:
+            self.lEd_RotorSpeed.setText(str(speed))
 
     def SetScanHeight(self) -> None:
         ''' Введённая высота ротора записывается как высота области сканирования '''
@@ -108,7 +172,7 @@ class MainUI(QMainWindow):
     def InitRotMotor(self) -> None:
         try: # Инициализация двигателя вращения ротора
             # Modbus-адрес драйвера по умолчанию - 1
-            self.instrumentRotor = minimalmodbus.Instrument('COM9', 1) #COM9, 1 - вращение, 2 - линейка
+            self.instrumentRotor = minimalmodbus.Instrument(self.cBox_PortMotor.currentText(), 1) #COM9, 1 - вращение, 2 - линейка
             # Настройка порта: скорость - 38400 бод/с, четность - нет, кол-во стоп-бит - 2.
             self.instrumentRotor.mode = minimalmodbus.MODE_RTU
             print(self.instrumentRotor.serial.port)
@@ -134,7 +198,7 @@ class MainUI(QMainWindow):
     def InitLinearMotor(self) -> None:
         try: # Инициализация двигателя линейки
             # Modbus-адрес драйвера по умолчанию - 1
-            self.instrumentLinear = minimalmodbus.Instrument('COM9', 2) #COM9, 1 - вращение, 2 - линейка
+            self.instrumentLinear = minimalmodbus.Instrument(self.cBox_PortMotor.currentText(), 2) #COM9, 1 - вращение, 2 - линейка
             # Настройка порта: скорость - 38400 бод/с, четность - нет, кол-во стоп-бит - 2.
             self.instrumentLinear.mode = minimalmodbus.MODE_RTU
             print(self.instrumentLinear.serial.port)
@@ -229,8 +293,8 @@ class MainUI(QMainWindow):
             # 0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
             # 0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
             # 0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
-            # 0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
-            # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
+            # 0x0064 - значение времени ускорения (100 мс/1000rpm), записывается по адресу 0x6204
+            # 0x0064 - значение времени торможения (100 мс/1000rpm), записывается по адресу 0x6205
             # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
             # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
             message = "Движение запущено"
@@ -252,15 +316,6 @@ class MainUI(QMainWindow):
             print(message)
             self.statusbar.showMessage(message)
         try:
-            # Формирование массива параметров для команды:
-            # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
-            # 0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
-            # 0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
-            # 0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
-            # 0x0064 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
-            # 0x0064 - значение времени торможения (1000 мс), записывается по адресу 0x6205
-            # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
-            # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
@@ -357,14 +412,16 @@ class MainUI(QMainWindow):
 
     def Step(self):
         ''' Функция для кнопки Шаг '''
-        step = round(int(self.lEd_Step.text())*2000/1000)
+        step = 2000 # round(int(self.lEd_Step.text())*2000/1000)
         speed = int(self.lEd_LinearSpeed.text()) 
-        print('Шаг на', self.SimpleStepLinear(speed=speed, step=step))
+        for _ in range(140):
+            print('Шаг на', self.SimpleStepLinear(speed=speed, step=step))
+            print(self.GetData()[3:5])
 
     def SimpleStepLinear(self, speed: int, step: int) -> int:
         ''' Простой шаг по образующей на заданное расстояние '''
         sleepStep = abs(step)/speed/100 # Время на паузу в сек, чтобы мотор успел прокрутиться
-        if sleepStep < 0.3: sleepStep = 0.3
+        if sleepStep < 1.0: sleepStep = 1.0
         Z0 = self.GetData()[3] # Запоминаем начальную позицию
         step *= -1 # Ось линейки направлена вверх, а ось двигателя - вниз, поэтому меняется знак
         if step < 0:
@@ -480,7 +537,7 @@ class MainUI(QMainWindow):
     def ScanGeneratrix(self, steps: int, step: int) -> None:
         ''' Сканирование в одну сторону вдоль образующей ротора
             steps - количество точек сканирования, шт
-            step  - расстояние между точками, имп (~2 имп/мкм)
+            step  - расстояние между точками, имп (2 имп/мкм)
         '''
         GeneratrixScanStepData = pd.Series()
         line = self.GetData()
@@ -490,9 +547,9 @@ class MainUI(QMainWindow):
         step *= -1 # Меняем знак, потому что ось двигателя и ось энкодера разнонаправлены
         gap = 0
         for s in range(steps):
-            jump = step + 2*gap # gap - поправка с учётом точности предыдущего шага
-            realstep = self.SimpleStepLinear(speed=100, step=jump) # Делаем шаг, вычисляем реальное перемещение.
-            gap = int(step/2 - realstep + gap) # Разница между заданным и искомым перемещением с учётом предыдущей поправки
+            jump = step + gap # gap - поправка с учётом точности предыдущего шага
+            realstep = self.SimpleStepLinear(speed=100, step=jump) # Делаем шаг, вычисляем реальное перемещение в мкм.
+            gap = int(step - 2*realstep + gap) # Разница между заданным и искомым перемещением с учётом предыдущей поправки
             GeneratrixScanStepData.loc[len(GeneratrixScanStepData)] = realstep
             line = self.GetData()
             line[3] = round(line[3] - self.ZeroZ)
@@ -601,7 +658,7 @@ class MainUI(QMainWindow):
     def GetData(self) -> list:
         ''' Получение данных с дата-порта '''
         try:
-            with (serial.Serial('COM8', baudrate=115200)) as self.serialData:
+            with (serial.Serial(self.cBox_PortData.currentText(), baudrate=115200)) as self.serialData:
                 # Read data from COM port
                 command = 'R'
                 # Send the command to the DataPort
@@ -662,7 +719,6 @@ class MainUI(QMainWindow):
         #self.setCentralWidget(self.view)
 
     def SaveConfig(self) -> None:
-        print(self.tab1_dateEdit.text())
         config_data = {
             'Date': self.tab1_dateEdit.text(),
             'Time': self.tab1_timeEdit.text(),
