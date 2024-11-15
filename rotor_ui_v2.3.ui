@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>630</width>
-    <height>600</height>
+    <width>754</width>
+    <height>653</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -340,14 +340,34 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QFrame" name="tab2_frame1">
+         <widget class="QFrame" name="tab2_frame0">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <layout class="QHBoxLayout" name="horizontalLayout_17">
+           <item>
+            <widget class="QLabel" name="lbl_PortMotor">
+             <property name="text">
+              <string>Порт двигателей</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cBox_PortMotor">
+             <property name="minimumSize">
+              <size>
+               <width>70</width>
+               <height>30</height>
+              </size>
+             </property>
+            </widget>
+           </item>
            <item>
             <widget class="QPushButton" name="pBtn_Init">
              <property name="minimumSize">
@@ -367,7 +387,7 @@
             </widget>
            </item>
            <item>
-            <spacer name="tab2_fr3_hSpacer">
+            <spacer name="horizontalSpacer_2">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -380,6 +400,38 @@
             </spacer>
            </item>
            <item>
+            <widget class="QLabel" name="lbl_PortData">
+             <property name="text">
+              <string>Порт данных</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cBox_PortData">
+             <property name="minimumSize">
+              <size>
+               <width>70</width>
+               <height>30</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="tab2_frame1">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <item>
             <widget class="QLabel" name="tab2_fr3_lbl1_LinearSpeed">
              <property name="minimumSize">
               <size>
@@ -388,8 +440,7 @@
               </size>
              </property>
              <property name="text">
-              <string>Скорость
-линейного
+              <string>Скорость линейного
 перемещения</string>
              </property>
              <property name="alignment">
@@ -416,6 +467,19 @@
               <string>об/мин</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item>
             <widget class="QLabel" name="tab2_fr3_lbl3_RotorSpeed">
@@ -519,7 +583,7 @@
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <layout class="QHBoxLayout" name="horizontalLayout_16">
            <item>
             <widget class="QLabel" name="lbl_Data">
              <property name="text">
@@ -540,10 +604,23 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QPushButton" name="pBtn_RotateCW">
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>200</width>
                <height>50</height>
               </size>
              </property>
@@ -557,10 +634,23 @@
             </widget>
            </item>
            <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QPushButton" name="pBtn_RotateCCW">
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>200</width>
                <height>50</height>
               </size>
              </property>
@@ -572,6 +662,19 @@
                <normaloff>arrow_right.png</normaloff>arrow_right.png</iconset>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -598,10 +701,23 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_11">
            <item>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QPushButton" name="pBtn_MoveUp">
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>200</width>
                <height>50</height>
               </size>
              </property>
@@ -615,10 +731,23 @@
             </widget>
            </item>
            <item>
+            <spacer name="horizontalSpacer_7">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QPushButton" name="pBtn_MoveDown">
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>200</width>
                <height>50</height>
               </size>
              </property>
@@ -630,6 +759,19 @@
                <normaloff>arrow_down.png</normaloff>arrow_down.png</iconset>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_8">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -656,10 +798,23 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_14">
            <item>
+            <spacer name="horizontalSpacer_10">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QPushButton" name="pBtn_ZeroPhi">
              <property name="minimumSize">
               <size>
-               <width>300</width>
+               <width>200</width>
                <height>50</height>
               </size>
              </property>
@@ -669,13 +824,26 @@
             </widget>
            </item>
            <item>
+            <spacer name="horizontalSpacer_9">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>87</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QPushButton" name="pBtn_ZeroZ">
              <property name="enabled">
               <bool>true</bool>
              </property>
              <property name="minimumSize">
               <size>
-               <width>300</width>
+               <width>200</width>
                <height>50</height>
               </size>
              </property>
@@ -683,6 +851,19 @@
               <string>Задать ноль образующей Z</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_11">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -712,29 +893,55 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_12">
            <item>
-            <widget class="QPushButton" name="pBtn_UpperLimit">
+            <spacer name="horizontalSpacer_13">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pBtn_Step">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>200</width>
                <height>50</height>
               </size>
              </property>
              <property name="text">
-              <string>Верхняя граница ротора</string>
+              <string>Шаг на 1 мм вверх</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pBtn_LowerLimit">
+            <spacer name="horizontalSpacer_12">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pBtn_Turn">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>200</width>
                <height>50</height>
               </size>
              </property>
@@ -742,6 +949,19 @@
               <string>Точный шаг на 1 градус</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_14">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
