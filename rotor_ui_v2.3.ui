@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>754</width>
-    <height>653</height>
+    <width>699</width>
+    <height>632</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>630</width>
+    <width>650</width>
     <height>600</height>
    </size>
   </property>
@@ -312,7 +312,7 @@
               </size>
              </property>
              <property name="text">
-              <string>Сохранить</string>
+              <string>Сохранить конфигурацию</string>
              </property>
             </widget>
            </item>
@@ -373,13 +373,16 @@
              <property name="minimumSize">
               <size>
                <width>200</width>
-               <height>50</height>
+               <height>30</height>
               </size>
              </property>
              <property name="font">
               <font>
                <italic>false</italic>
               </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: salmon</string>
              </property>
              <property name="text">
               <string>Инициализация двигателей</string>
@@ -523,6 +526,12 @@
         </item>
         <item>
          <widget class="QFrame" name="tab2_frame2">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>75</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
@@ -541,7 +550,7 @@
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>50</height>
+               <height>65</height>
               </size>
              </property>
              <property name="maximumSize">
@@ -562,8 +571,8 @@
              </property>
              <property name="minimumSize">
               <size>
-               <width>200</width>
-               <height>50</height>
+               <width>150</width>
+               <height>60</height>
               </size>
              </property>
              <property name="text">
@@ -572,11 +581,30 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QPushButton" name="pBtn_Calibrate">
+             <property name="minimumSize">
+              <size>
+               <width>150</width>
+               <height>60</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Калибровка</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
         <item>
          <widget class="QFrame" name="tab2_frame3">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>80</height>
+           </size>
+          </property>
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -585,17 +613,59 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_16">
            <item>
-            <widget class="QLabel" name="lbl_Data">
+            <spacer name="horizontalSpacer_15">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pBtn_MoveUp">
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>70</height>
+              </size>
+             </property>
              <property name="text">
-              <string>Прямые данные с датчиков</string>
+              <string>Движение вверх</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>arrow_up.png</normaloff>arrow_up.png</iconset>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
         </item>
         <item>
          <widget class="QFrame" name="tab2_frame4_Rotate">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>80</height>
+           </size>
+          </property>
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -621,7 +691,7 @@
              <property name="minimumSize">
               <size>
                <width>200</width>
-               <height>50</height>
+               <height>70</height>
               </size>
              </property>
              <property name="text">
@@ -651,7 +721,7 @@
              <property name="minimumSize">
               <size>
                <width>200</width>
-               <height>50</height>
+               <height>70</height>
               </size>
              </property>
              <property name="text">
@@ -684,7 +754,7 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>70</height>
+            <height>80</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -700,36 +770,6 @@
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_11">
-           <item>
-            <spacer name="horizontalSpacer_6">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pBtn_MoveUp">
-             <property name="minimumSize">
-              <size>
-               <width>200</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Движение вверх</string>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>arrow_up.png</normaloff>arrow_up.png</iconset>
-             </property>
-            </widget>
-           </item>
            <item>
             <spacer name="horizontalSpacer_7">
              <property name="orientation">
@@ -748,7 +788,7 @@
              <property name="minimumSize">
               <size>
                <width>200</width>
-               <height>50</height>
+               <height>70</height>
               </size>
              </property>
              <property name="text">
@@ -854,104 +894,6 @@
            </item>
            <item>
             <spacer name="horizontalSpacer_11">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="tab2_frame7_Limits">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>70</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>70</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_12">
-           <item>
-            <spacer name="horizontalSpacer_13">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pBtn_Step">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>200</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Шаг на 1 мм вверх</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_12">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pBtn_Turn">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>200</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Точный шаг на 1 градус</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_14">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -1434,14 +1376,53 @@
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
+       <widget class="QLabel" name="lbl_Data">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>350</y>
+          <width>591</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Данные онлайн</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tab4_fast">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <attribute name="title">
         <string>Спиральный режим</string>
        </attribute>
+       <widget class="QPushButton" name="pBtn_Turn">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>150</y>
+          <width>141</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Turn</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pBtn_Step">
+        <property name="geometry">
+         <rect>
+          <x>250</x>
+          <y>150</y>
+          <width>141</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Step</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tab5_result">
        <property name="enabled">
@@ -1469,10 +1450,10 @@
        <widget class="QFrame" name="fr_Result">
         <property name="geometry">
          <rect>
-          <x>20</x>
-          <y>130</y>
+          <x>10</x>
+          <y>120</y>
           <width>651</width>
-          <height>461</height>
+          <height>431</height>
          </rect>
         </property>
         <property name="frameShape">
