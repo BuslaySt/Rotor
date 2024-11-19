@@ -67,6 +67,9 @@ class MainUI(QMainWindow):
         self.lEd_RotorSpeed.setValidator(QIntValidator())
         self.lEd_RotorSpeed.editingFinished.connect(self.CheckRotSpeed)
 
+        self.pBtn_ShowData.clicked.connect(self.ShowData)
+        self.pBtn_Calibrate.clicked.connect(self.Calibrate)
+
         self.pBtn_RotateCW.pressed.connect(self.RotateCW)
         self.pBtn_RotateCW.released.connect(self.StopRotor)
         self.pBtn_RotateCCW.pressed.connect(self.RotateCCW)
@@ -80,9 +83,6 @@ class MainUI(QMainWindow):
         self.pBtn_ZeroPhi.clicked.connect(self.SetZeroPhi)
         self.pBtn_ZeroZ.clicked.connect(self.SetZeroZ)
 
-        self.pBtn_Step.clicked.connect(self.Step)
-        self.pBtn_Turn.clicked.connect(self.PresizeStepRotor)
-
         # Окно точного шагания
         self.cBox_ScanStepGeneratrix.addItems(['0,5 мм', '1 мм', '2 мм','4 мм'])
         self.cBox_ScanStepGeneratrix.setCurrentIndex(1)
@@ -91,7 +91,10 @@ class MainUI(QMainWindow):
         self.pBtn_Position.clicked.connect(self.AbsPositioning)
         self.lEd_ScanStepAngle.textChanged.connect(self.Angle2MM)
         self.pBtn_ScanGeneratrix.clicked.connect(self.Scan)
-        self.pBtn_ShowData.clicked.connect(self.ShowData)
+
+        # Окно спирального режима
+        self.pBtn_Step.clicked.connect(self.Step)
+        self.pBtn_Turn.clicked.connect(self.SimpleStepRotor)
 
         # Окно вывода результатов
         self.pBtn_Result.clicked.connect(self.ShowGraph)
@@ -166,8 +169,8 @@ class MainUI(QMainWindow):
             pass
 
     def Init(self) -> None:
-        self.InitRotMotor()
-        self.InitLinearMotor()
+        if self.InitRotMotor() and self.InitLinearMotor():
+            self.pBtn_Init.setStyleSheet("background-color : forestgreen") 
 
     def InitRotMotor(self) -> None:
         try: # Инициализация двигателя вращения ротора
@@ -184,16 +187,21 @@ class MainUI(QMainWindow):
             # self.instrumentRotor.close_port_after_each_call = True
             print(self.instrumentRotor)
             print('Вращение подключено')
-        except (IOError, AttributeError, ValueError): # minimalmodbus.serial.serialutil.SerialException:
-            message = "Привод вращения не виден"
+        except (IOError, AttributeError, ValueError) as err: # minimalmodbus.serial.serialutil.SerialException:
+            message = "Привод вращения не виден, Error: " + str(err)
             print(message)
+            self.statusbar.showMessage(message)
+            return False
 
         try:
             # Команда включения серво; 0x0405 - адрес параметра; 0x83 - значение параметра
             self.instrumentRotor.write_registers(0x00F, [1])
-        except (IOError, AttributeError, ValueError): # minimalmodbus.serial.serialutil.SerialException:
-            message = "Запуск привода вращения не удался"
+            return True
+        except (IOError, AttributeError, ValueError) as err: # minimalmodbus.serial.serialutil.SerialException:
+            message = "Запуск привода вращения не удался, Error: " + str(err)
             print(message)
+            self.statusbar.showMessage(message)
+            return False
 
     def InitLinearMotor(self) -> None:
         try: # Инициализация двигателя линейки
@@ -210,17 +218,27 @@ class MainUI(QMainWindow):
             # self.instrumentLinear.close_port_after_each_call = True
             print(self.instrumentLinear)
             print('Линейка подключена')
-        except (IOError, AttributeError, ValueError): # minimalmodbus.serial.serialutil.SerialException:
-            message = "Привод линейки не виден"
+        except (IOError, AttributeError, ValueError) as err: # minimalmodbus.serial.serialutil.SerialException:
+            message = "Привод линейки не виден, Error: " + str(err)
             print(message)
+            self.statusbar.showMessage(message)
+            return False
 
         try:
             # Команда включения серво; 0x0405 - адрес параметра; 0x83 - значение параметра
             self.instrumentLinear.write_registers(0x00F, [1])
-            # self.instrumentLinear.write_registers(0x0007, [0x0000])
-        except (IOError, AttributeError, ValueError): # minimalmodbus.serial.serialutil.SerialException:
-            message = "Запуск привода линейки не удался"
+            return True
+        except (IOError, AttributeError, ValueError) as err: # minimalmodbus.serial.serialutil.SerialException:
+            message = "Запуск привода линейки не удался, Error: " + str(err)
             print(message)
+            self.statusbar.showMessage(message)
+            return False
+
+    def Calibrate(self):
+        ''' Калибровка позиционирования поворотом на 360 и перемещением вверх-вниз до концевиков '''
+        self.SimpleStepRotor(speed=5, angle=36000)
+        
+        # self.MoveUpDown()
 
     def RotateCW(self) -> None:
         try:
@@ -379,7 +397,7 @@ class MainUI(QMainWindow):
             time.sleep(0.5)
             self.SimpleStepRotor(speed=1, angle=round(distance*100))
             line = self.GetData()
-            distance = PHIpos - line[5]
+            distance = (PHIpos - line[5])%360
             count += 1
 
     def SetUpperLimit(self) -> None:
@@ -464,8 +482,12 @@ class MainUI(QMainWindow):
         rotationData = rotationData.loc[(rotationData>-10)&(rotationData<10)]
         print(rotationData.describe())
 
-    def SimpleStepRotor(self, speed: int, angle: int) -> int:
+    def SimpleStepRotor(self, speed=1, angle=100) -> int:
         ''' Простой поворот на заданный угол '''
+        if self.sender() == self.pBtn_Turn:
+            ''' Точный поворот с кнопки Временно '''
+            speed=1
+            angle=100
         sleepStep = abs(angle)/speed/400 # Время на паузу в сек, чтобы мотор успел прокрутиться
         if sleepStep < 0.5: sleepStep = 0.5
         PHI0 = self.GetData()[5] # Запоминаем начальный угол
@@ -489,16 +511,17 @@ class MainUI(QMainWindow):
         except (IOError, AttributeError, ValueError):
             message = "Команда на поворот не прошла"
             print(message)
+            self.statusbar.showMessage(message)
             rotationstep = 0
 
         return rotationstep
 
     def PresizeStepRotor(self, speed=1, angle=100) -> int:
         ''' Точный поворот на заданный угол, указывается в сотых долях градуса (1 градус = 100) '''
-        if self.sender() == self.pBtn_LowerLimit:
-            ''' Точный поворот с кнопки Временно '''
-            speed=1
-            angle=36000
+        # if self.sender() == self.pBtn_Turn:
+        #     ''' Точный поворот с кнопки Временно '''
+        #     speed=1
+        #     angle=100
 
         line = self.GetData()
         PHI0 = line[5]*100 # Запоминаем начальный угол
@@ -555,6 +578,10 @@ class MainUI(QMainWindow):
             line[3] = round(line[3] - self.ZeroZ)
             line[5] = round(line[5] - self.ZeroPhi, 3)%360
             self.data.loc[len(self.data)] = line
+            if line[4] > 5:
+                message = "Ошибка измерения Zerr больше 5!"
+                print(message)
+                self.statusbar.showMessage(message)
         print('Среднее значение шага по образующей:', GeneratrixScanStepData.mean())
 
     def Scan(self) -> None:
@@ -579,7 +606,7 @@ class MainUI(QMainWindow):
 
         NumberOfRuns = round(float(self.lEd_Range_PHI.text())/(2*round(float(self.lEd_ScanStepAngle.text()), 2))) # Задаём количество шагов по окружности (пополам, потому что вверх-вниз)
         rotationgap = 0
-        for n in range(NumberOfRuns):
+        for n in range(NumberOfRuns+1):
             print('Проход номер', n)
 
             # Выборка люфта снизу
