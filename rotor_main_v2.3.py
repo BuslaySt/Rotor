@@ -551,11 +551,9 @@ class MainUI(QMainWindow):
             rotationstep = self.SimpleStepRotor(speed, round(angleShift*0.9))
             line = self.GetData()
             angleShift = (PHIFinish-line[5]*100)%360
-            if angleShift < 0: angleShift = 0
-            elif angleShift > 350: angleShift = 0
-            print('Зазор по углу -', angleShift) # TODO Временно
+            if angleShift > 100: angleShift = 0
             count += 1
-        
+
         line = self.GetData()
         realrotation = round((line[5] - PHI0/100)%360, 2) # На сколько реально прокрутился ротор
         return realrotation
@@ -587,7 +585,6 @@ class MainUI(QMainWindow):
         line = self.GetData()
         line[3] = round(line[3] - self.ZeroZ)
         line[5] = round(line[5] - self.ZeroPhi, 3)%360
-        line.append(self.rotationgap)                     # TODO Временное поле
         self.data.loc[len(self.data)] = line
         step *= -1 # Меняем знак, потому что ось двигателя и ось энкодера разнонаправлены
         gap = 0
@@ -599,7 +596,6 @@ class MainUI(QMainWindow):
             line = self.GetData()
             line[3] = round(line[3] - self.ZeroZ)
             line[5] = round(line[5] - self.ZeroPhi, 3)%360
-            line.append(self.rotationgap)                    # TODO Временное поле
             self.data.loc[len(self.data)] = line
             if line[4] > 5:
                 message = "Ошибка измерения Zerr больше 5!"
@@ -609,8 +605,7 @@ class MainUI(QMainWindow):
 
     def Scan(self) -> None:
         ''' Сканирование по образующей вниз и вверх от заданных границ '''
-        # self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T'])
-        self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T', 'RotGap'])  # TODO Временно с RotGap
+        self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T'])
 
         line = self.GetData()
 
@@ -639,7 +634,7 @@ class MainUI(QMainWindow):
             shift = start-line[3]
 
             # Парковка
-            print('Парковка по нижней границе')
+            print('Парковка по нижней границе и движение вверх...')
             count = 0
             while shift > 2 and count < 5:
                 time.sleep(0.5)
@@ -652,11 +647,9 @@ class MainUI(QMainWindow):
             self.ScanGeneratrix(steps=steps, step=-step)
 
             # Шаг по окружности
-            print(f'Команда на поворот - {rotation+self.rotationgap}')
             realrotation = self.PresizeStepRotor(speed=1, angle=(rotation+self.rotationgap))
             self.rotationgap = round(rotation - realrotation*100 + self.rotationgap)
             print('Поворот на угол - ', realrotation)
-            print('Поправка от предыдущего шага - ', self.rotationgap)
 
             time.sleep(1)
 
@@ -671,7 +664,7 @@ class MainUI(QMainWindow):
             shift = line[3]-finish
 
             # Парковка
-            print('Парковка по верхней границе...')
+            print('Парковка по верхней границе и движение вниз...')
             count = 0
             while shift > 2 and count < 5:
                 time.sleep(0.5)
@@ -684,11 +677,9 @@ class MainUI(QMainWindow):
             self.ScanGeneratrix(steps=steps, step=step)
 
             # Шаг по окружности
-            print(f'Команда на поворот - {rotation+self.rotationgap}')
             realrotation = self.PresizeStepRotor(speed=1, angle=(rotation+self.rotationgap))
             self.rotationgap = round(rotation - realrotation*100 + self.rotationgap)
             print('Поворот на угол - ', realrotation)
-            print('Поправка от предыдущего шага - ', self.rotationgap)
             
             time.sleep(1)
             
