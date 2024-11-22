@@ -1,4 +1,4 @@
-from PyQt5.QtGui import QIntValidator
+# from PyQt5.QtGui import QIntValidator, QDoubleValidator
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.uic import loadUi
 import sys, datetime, time, json
@@ -14,6 +14,9 @@ class MainUI(QMainWindow):
         super(MainUI, self).__init__()
         loadUi("rotor_ui_v2.3.ui", self)
 
+        self.LinearSpeed = 100
+        self.RotSpeed = 1
+
         try:     # Загрузка параметров из файла конфигурации
             with open('config.json', 'r') as config_file: 
                 config_data = json.load(config_file)
@@ -27,8 +30,8 @@ class MainUI(QMainWindow):
                 'RtrNumber': 'RotorNumber',
                 'RtrDiam': 155,
                 'RtrHght': 140,
-                'ZeroPhi': 0,
-                'ZeroZ': 0}
+                'ZeroPhi': 0.0,
+                'ZeroZ': 0.0}
         self.pBtn_SaveConfig.clicked.connect(self.SaveConfig)
 
         # ---------- Serial ports ----------
@@ -52,8 +55,8 @@ class MainUI(QMainWindow):
         self.ZeroPhi = config_data['ZeroPhi']
         self.ZeroZ = config_data['ZeroZ']
 
-        self.lEd_RotorDiam.textChanged.connect(self.Angle2MM)
-        self.lEd_RotorHght.textChanged.connect(self.SetScanHeight)
+        self.lEd_RotorDiam.editingFinished.connect(self.Angle2MM)
+        self.lEd_RotorHght.editingFinished.connect(self.SetScanHeight)
         
         # Окно настроек
         self.cBox_PortMotor.addItems(self.comPorts)
@@ -61,11 +64,6 @@ class MainUI(QMainWindow):
         self.cBox_PortData.addItems(self.comPorts)
         self.cBox_PortData.setCurrentIndex(1)
         self.pBtn_Init.clicked.connect(self.Init)
-
-        self.lEd_LinearSpeed.setValidator(QIntValidator())
-        self.lEd_LinearSpeed.editingFinished.connect(self.CheckLinSpeed)
-        self.lEd_RotorSpeed.setValidator(QIntValidator())
-        self.lEd_RotorSpeed.editingFinished.connect(self.CheckRotSpeed)
 
         self.pBtn_ShowData.clicked.connect(self.ShowData)
         self.pBtn_Calibrate.clicked.connect(self.Calibrate)
@@ -89,7 +87,7 @@ class MainUI(QMainWindow):
         self.LinearStep = 1000 # 1mm default
         self.cBox_ScanStepGeneratrix.currentIndexChanged.connect(self.SetupScanStepGeneratrix)
         self.pBtn_Position.clicked.connect(self.AbsPositioning)
-        self.lEd_ScanStepAngle.textChanged.connect(self.Angle2MM)
+        self.dSpBox_ScanStepAngle.textChanged.connect(self.Angle2MM)
         self.pBtn_ScanGeneratrix.clicked.connect(self.Scan)
 
         # Окно спирального режима
@@ -99,53 +97,55 @@ class MainUI(QMainWindow):
         # Окно вывода результатов
         self.pBtn_Result.clicked.connect(self.ShowGraph)
 
-    def CheckLinSpeed(self):
-        speed = self.lEd_LinearSpeed.text()
-        try:
-            speed = int(speed)
-            if speed > 200:
-                message = "Не задавайте скорость каретки более 200"
-                print(message)
-                self.statusbar.showMessage(message)
-                speed = 200
-            elif speed <=0:
-                message = "Введите целое положительное число"
-                print(message)
-                self.statusbar.showMessage(message)
-                speed = 1
-        except ValueError:
-            speed = 100
-            message = "Введите целое положительное число"
-            print(message)
-            self.statusbar.showMessage(message)
-        finally:
-            self.lEd_LinearSpeed.setText(str(speed))
+    if 1:
+        pass
+        # def CheckLinSpeed(self):
+        #     speed = self.lEd_LinearSpeed.text()
+        #     try:
+        #         speed = int(speed)
+        #         if speed > 200:
+        #             message = "Не задавайте скорость каретки более 200"
+        #             print(message)
+        #             self.statusbar.showMessage(message)
+        #             speed = 200
+        #         elif speed <=0:
+        #             message = "Введите целое положительное число"
+        #             print(message)
+        #             self.statusbar.showMessage(message)
+        #             speed = 1
+        #     except ValueError:
+        #         speed = 100
+        #         message = "Введите целое положительное число"
+        #         print(message)
+        #         self.statusbar.showMessage(message)
+        #     finally:
+        #         self.lEd_LinearSpeed.setText(str(speed))
 
-    def CheckRotSpeed(self):
-        speed = self.lEd_RotorSpeed.text()
-        try:
-            speed = int(speed)
-            if speed > 5:
-                message = "Не задавайте скорость вращения более 5 об/мин"
-                print(message)
-                self.statusbar.showMessage(message)
-                speed = 5
-            elif speed <=0:
-                message = "Введите целое положительное число"
-                print(message)
-                self.statusbar.showMessage(message)
-                speed = 1
-        except ValueError:
-            speed = 1
-            message = "Введите целое положительное число"
-            print(message)
-            self.statusbar.showMessage(message)
-        finally:
-            self.lEd_RotorSpeed.setText(str(speed))
+        # def CheckRotSpeed(self):
+        #     speed = self.lEd_RotorSpeed.text()
+        #     try:
+        #         speed = int(speed)
+        #         if speed > 5:
+        #             message = "Не задавайте скорость вращения более 5 об/мин"
+        #             print(message)
+        #             self.statusbar.showMessage(message)
+        #             speed = 5
+        #         elif speed <=0:
+        #             message = "Введите целое положительное число"
+        #             print(message)
+        #             self.statusbar.showMessage(message)
+        #             speed = 1
+        #     except ValueError:
+        #         speed = 1
+        #         message = "Введите целое положительное число"
+        #         print(message)
+        #         self.statusbar.showMessage(message)
+        #     finally:
+        #         self.lEd_RotorSpeed.setText(str(speed))
 
     def SetScanHeight(self) -> None:
         ''' Введённая высота ротора записывается как высота области сканирования '''
-        self.lEd_Range_Z.setText(self.lEd_RotorHght.text())
+        self.dSpBox_Range_Z.setValue(float(self.lEd_RotorHght.text().replace(',','.')))
 
     def SetupScanStepGeneratrix(self, index: int) -> None:
         match index:
@@ -163,14 +163,18 @@ class MainUI(QMainWindow):
         ''' Пересчёт шага сканирования по углу из градусов в мм
             в зависимости от диаметра ротора'''
         try:
-            millimeters = round(float(self.lEd_ScanStepAngle.text())*3.14159*int(self.lEd_RotorDiam.text())/360, 3)
-            self.lbl_ScanStepAngleMM.setText(str(millimeters))
+            millimeters = round(self.dSpBox_ScanStepAngle.value()*3.14159*float(self.lEd_RotorDiam.text().replace(',', '.'))/360, 3)
+            self.lbl_ScanStepAngleMM.setText(str(millimeters).replace('.', ','))
         except ValueError:
-            pass
+            message = "Неверные значения в поле диаметра ротора"
+            print(message)
+            self.statusbar.showMessage(message)
 
     def Init(self) -> None:
+        ''' Запускается инициализация двигателей вращения и линейки, если удачно, кнопка зеленеет '''
         if self.InitRotMotor() and self.InitLinearMotor():
-            self.pBtn_Init.setStyleSheet("background-color : forestgreen") 
+            self.pBtn_Init.setStyleSheet(   'QPushButton {background-color : forestgreen;}'
+                                            'QPushButton:hover { background-color: #45a049;}') 
 
     def InitRotMotor(self) -> None:
         try: # Инициализация двигателя вращения ротора
@@ -241,14 +245,14 @@ class MainUI(QMainWindow):
         # self.MoveUpDown()
 
     def RotateCW(self) -> None:
-        try:
-            speed = int(self.lEd_RotorSpeed.text())
-        except ValueError:
-            speed = 1
-            self.lEd_RotorSpeed.setText('1')
-            message = "Скорость задана неверно"
-            print(message)
-            self.statusbar.showMessage(message)
+        # try:
+        #     speed = int(self.lEd_RotorSpeed.text())
+        # except ValueError:
+        #     speed = 1
+        #     self.lEd_RotorSpeed.setText('1')
+        #     message = "Скорость задана неверно"
+        #     print(message)
+        #     self.statusbar.showMessage(message)
         try:
             # Формирование массива параметров для команды:
             # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
@@ -262,82 +266,84 @@ class MainUI(QMainWindow):
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentRotor.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+            self.instrumentRotor.write_registers(0x6200, [0x0002, 0x0000, 0x0000, self.RotSpeed, 0x03E8, 0x03E8, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
             self.statusbar.showMessage(message)
 
     def RotateCCW(self) -> None:
+        # try:
+        #     speed = 65536-int(self.lEd_RotorSpeed.text())
+        # except ValueError:
+        #     speed = 65536-1
+        #     self.lEd_RotorSpeed.setText('1')
+        #     message = "Скорость задана неверно"
+        #     print(message)
+        #     self.statusbar.showMessage(message)
         try:
-            speed = 65536-int(self.lEd_RotorSpeed.text())
-        except ValueError:
-            speed = 65536-1
-            self.lEd_RotorSpeed.setText('1')
-            message = "Скорость задана неверно"
-            print(message)
-            self.statusbar.showMessage(message)
-        try:
-            # Формирование массива параметров для команды:
-            # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
-            # 0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
-            # 0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
-            # 0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
-            # 0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
-            # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
-            # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
-            # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
+            '''
+            Формирование массива параметров для команды:
+            0x0002 - режим управления скоростью, записывается по адресу 0x6200
+            0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
+            0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
+            0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
+            0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
+            0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
+            0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
+            0x0010 - значение триггера для начала движения, записывается по адресу 0x6207 '''
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentRotor.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+            self.instrumentRotor.write_registers(0x6200, [0x0002, 0x0000, 0x0000, 65536-self.RotSpeed, 0x03E8, 0x03E8, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
             self.statusbar.showMessage(message)
 
     def LinearMotionDown(self) -> None:
+        # try:
+        #     speed = int(self.lEd_LinearSpeed.text())
+        # except ValueError:
+        #     speed = 100
+        #     self.lEd_LinearSpeed.setText('100')
+        #     message = "Скорость задана неверно"
+        #     print(message)
+        #     self.statusbar.showMessage(message)
         try:
-            speed = int(self.lEd_LinearSpeed.text())
-        except ValueError:
-            speed = 100
-            self.lEd_LinearSpeed.setText('100')
-            message = "Скорость задана неверно"
-            print(message)
-            self.statusbar.showMessage(message)
-        try:
-            # Формирование массива параметров для команды:
-            # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
-            # 0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
-            # 0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
-            # 0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
-            # 0x0064 - значение времени ускорения (100 мс/1000rpm), записывается по адресу 0x6204
-            # 0x0064 - значение времени торможения (100 мс/1000rpm), записывается по адресу 0x6205
-            # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
-            # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
+            '''
+            Формирование массива параметров для команды:
+            0x0002 - режим управления скоростью, записывается по адресу 0x6200
+            0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
+            0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
+            0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
+            0x0064 - значение времени ускорения (100 мс/1000rpm), записывается по адресу 0x6204
+            0x0064 - значение времени торможения (100 мс/1000rpm), записывается по адресу 0x6205
+            0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
+            0x0010 - значение триггера для начала движения, записывается по адресу 0x6207 '''
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x0064, 0x0064, 0x0000, 0x0010])
+            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, self.LinearSpeed*2, 0x0064, 0x0064, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
             self.statusbar.showMessage(message)
 
     def LinearMotionUp(self) -> None:
-        try:
-            speed = 65536-int(self.lEd_LinearSpeed.text())
-        except ValueError:
-            speed = 65536-100
-            self.lEd_LinearSpeed.setText('100')
-            message = "Скорость задана неверно"
-            print(message)
-            self.statusbar.showMessage(message)
+        # try:
+        #     speed = 65536-int(self.lEd_LinearSpeed.text())
+        # except ValueError:
+        #     speed = 65536-100
+        #     self.lEd_LinearSpeed.setText('100')
+        #     message = "Скорость задана неверно"
+        #     print(message)
+        #     self.statusbar.showMessage(message)
         try:
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x0064, 0x0064, 0x0000, 0x0010])
+            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, 65536-self.LinearSpeed*2, 0x0064, 0x0064, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
@@ -367,9 +373,9 @@ class MainUI(QMainWindow):
             self.statusbar.showMessage(message)      
 
     def AbsPositioning(self) -> None:
-        Zpos = int(round(float(self.lEd_Pos_Z.text()), 3)*1000) # Считываем мм, переводим в мкм и округляем до целого
+        Zpos = int(self.dSpBox_Pos_Z.value()*1000) # Считываем мм, переводим в мкм и округляем до целого
         self.LinearPositioning(Zpos+self.ZeroZ)
-        PHIpos = round(float(self.lEd_Pos_PHI.text()), 3) # Угловое положение в градусах с точностью до 3-го знака
+        PHIpos = self.dSpBox_Pos_PHI.value() # Угловое положение в градусах с точностью до 3-го знака
         self.AngularPositioning(PHIpos + self.ZeroPhi)
         line = self.GetData()
         print('Приехали в точку: Z=', line[3]-self.ZeroZ, ' Phi=', line[5]-self.ZeroPhi)
@@ -378,26 +384,34 @@ class MainUI(QMainWindow):
         ''' Перемещение каретки в заданную координату Zpos '''
         line = self.GetData()
         distance = line[3] - Zpos
-        print('Перемещение по образующей...')
+        print('Перемещение по образующей')
         count = 0
-        while abs(distance) > 1 and count < 5:
-            time.sleep(0.5)
+        while abs(distance) > 1 and count < 3:
             self.SimpleStepLinear(speed=100, step=-1*int(distance*2))
             line = self.GetData()
             distance = line[3] - Zpos
+            print(count, distance)
             count += 1
 
     def AngularPositioning(self, PHIpos: float) -> None:
-        ''' Перемещение каретки в заданную координату Zpos '''
+        ''' Перемещение каретки в заданную координату PHIpos '''
         line = self.GetData()
-        distance = PHIpos - line[5]
-        print('Перемещение по радиусу...')
+        distance = (PHIpos-line[5])%360
+        if distance > 180: distance -= 360 # Чтобы вращалось не более чем полокружности
+        print(f'Вращение на {distance:.2f} градусов')
+        if abs(distance) > 50:
+            turnspeed = 3
+        elif abs(distance) > 20:
+            turnspeed = 2
+        else:
+            turnspeed = 1
         count = 0
-        while abs(distance*100) > 2 and count < 5:
-            time.sleep(0.5)
-            self.SimpleStepRotor(speed=1, angle=round(distance*100))
+        while abs(distance*100) > 2 and count < 2:
+            self.SimpleStepRotor(speed=turnspeed, angle=round(distance*100))
             line = self.GetData()
-            distance = (PHIpos - line[5])%360
+            distance = (PHIpos-line[5])%360
+            if 180 < distance < 360: distance -= 360
+            turnspeed = 1
             count += 1
 
     def SetUpperLimit(self) -> None:
@@ -431,12 +445,12 @@ class MainUI(QMainWindow):
     def Step(self):
         ''' Функция для кнопки Шаг '''
         step = 2000 # round(int(self.lEd_Step.text())*2000/1000)
-        speed = int(self.lEd_LinearSpeed.text()) 
+        # speed = int(self.lEd_LinearSpeed.text()) 
         for _ in range(140):
-            print('Шаг на', self.SimpleStepLinear(speed=speed, step=step))
+            print('Шаг на', self.SimpleStepLinear(speed=self.LinearSpeed, step=step))
             print(self.GetData()[3:5])
 
-    def SimpleStepLinear(self, speed: int, step: int) -> int:
+    def SimpleStepLinear(self, speed=100, step=2000) -> int:
         ''' Простой шаг по образующей на заданное расстояние '''
         sleepStep = abs(step)/speed/100 # Время на паузу в сек, чтобы мотор успел прокрутиться
         if sleepStep < 1.0: sleepStep = 1.0
@@ -445,15 +459,17 @@ class MainUI(QMainWindow):
         if step < 0:
             step = 0xFFFFFFFF+step
         step1, step2 = divmod(step, 0x10000)
-        # Формирование массива параметров для команды:
-        # 0x0041 - 65 - режим однократного увеличения позиции (шаг), записывается по адресу 0x6200
-        # 0x0000 - верхние два байта кол-ва оборотов (=0 обычно), записывается по адресу 0x6201
-        # 0x0000 - нижние два байта кол-ва оборотов  (=шаг), записывается по адресу 0x6202
-        # 0x0000 - значение скорости вращения (об/мин), записывается по адресу 0x6203
-        # 0x0064 - значение времени ускорения (100 мс), записывается по адресу 0x6204
-        # 0x0064 - значение времени торможения (100 мс), записывается по адресу 0x6205
-        # 0x000A - задержка перед началом движения (10 мс), записывается по адресу 0x6206
-        # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
+        '''
+        Формирование массива параметров для команды:
+        0x0041 - 65 - режим однократного увеличения позиции (шаг), записывается по адресу 0x6200
+        0x0000 - верхние два байта кол-ва оборотов (=0 обычно), записывается по адресу 0x6201
+        0x0000 - нижние два байта кол-ва оборотов  (=шаг), записывается по адресу 0x6202
+        0x0000 - значение скорости вращения (об/мин), записывается по адресу 0x6203
+        0x0064 - значение времени ускорения (100 мс), записывается по адресу 0x6204
+        0x0064 - значение времени торможения (100 мс), записывается по адресу 0x6205
+        0x000A - задержка перед началом движения (10 мс), записывается по адресу 0x6206
+        0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
+        ''' 
         try:
             self.instrumentLinear.write_registers(0x6200, [0x0041, step1, step2, speed, 0x0064, 0x0064, 0x0000, 0x0010])
             time.sleep(sleepStep) # Пауза, чтобы мотор успел прокрутиться
@@ -469,7 +485,7 @@ class MainUI(QMainWindow):
     def Rotate(self):
         ''' Оборот вокруг оси на заданное число градусов (шагов)'''
         rotationData = pd.Series()
-        rotation = int(self.lEd_Rotation.text())
+        rotation = 100
         line = self.GetData()
         start = line[5]
         for _ in range(5):
@@ -494,15 +510,17 @@ class MainUI(QMainWindow):
         if angle<0:
             angle = 0xFFFFFFFF+angle
         step1, step2 = divmod(angle, 0x10000)
-        # Формирование массива параметров для команды:
-        # 0x0041 - 65 - режим однократного увеличения позиции (шаг), записывается по адресу 0x6200
-        # 0x0000 - верхние два байта кол-ва оборотов (=0 обычно), записывается по адресу 0x6201
-        # 0x0000 - нижние два байта кол-ва оборотов  (=шаг), записывается по адресу 0x6202
-        # 0x0000 - значение скорости вращения (об/мин), записывается по адресу 0x6203
-        # 0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
-        # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
-        # 0x000A - задержка перед началом движения (10 мс), записывается по адресу 0x6206
-        # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
+        '''
+        Формирование массива параметров для команды:
+        0x0041 - 65 - режим однократного увеличения позиции (шаг), записывается по адресу 0x6200
+        0x0000 - верхние два байта кол-ва оборотов (=0 обычно), записывается по адресу 0x6201
+        0x0000 - нижние два байта кол-ва оборотов  (=шаг), записывается по адресу 0x6202
+        0x0000 - значение скорости вращения (об/мин), записывается по адресу 0x6203
+        0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
+        0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
+        0x000A - задержка перед началом движения (10 мс), записывается по адресу 0x6206
+        0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
+        '''
         try:
             self.instrumentRotor.write_registers(0x6200, [0x0041, step1, step2, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
             time.sleep(sleepStep) # Пауза на поворот
@@ -525,14 +543,17 @@ class MainUI(QMainWindow):
 
         line = self.GetData()
         PHI0 = line[5]*100 # Запоминаем начальный угол
-        PHIFinish = PHI0 + angle # Куда надо докрутить
+        PHIFinish = (PHI0 + angle)%360 # Куда надо докрутить
 
         angleShift = angle
         count = 0
-        while angleShift > 0.5 and count < 5:
-            rotationstep = self.SimpleStepRotor(speed, round(angleShift*0.8))
+        while angleShift > 1.5 and count < 5:
+            rotationstep = self.SimpleStepRotor(speed, round(angleShift*0.9))
             line = self.GetData()
             angleShift = (PHIFinish-line[5]*100)%360
+            if angleShift < 0: angleShift = 0
+            elif angleShift > 350: angleShift = 0
+            print('Зазор по углу -', angleShift) # TODO Временно
             count += 1
         
         line = self.GetData()
@@ -566,6 +587,7 @@ class MainUI(QMainWindow):
         line = self.GetData()
         line[3] = round(line[3] - self.ZeroZ)
         line[5] = round(line[5] - self.ZeroPhi, 3)%360
+        line.append(self.rotationgap)                     # TODO Временное поле
         self.data.loc[len(self.data)] = line
         step *= -1 # Меняем знак, потому что ось двигателя и ось энкодера разнонаправлены
         gap = 0
@@ -577,6 +599,7 @@ class MainUI(QMainWindow):
             line = self.GetData()
             line[3] = round(line[3] - self.ZeroZ)
             line[5] = round(line[5] - self.ZeroPhi, 3)%360
+            line.append(self.rotationgap)                    # TODO Временное поле
             self.data.loc[len(self.data)] = line
             if line[4] > 5:
                 message = "Ошибка измерения Zerr больше 5!"
@@ -586,26 +609,25 @@ class MainUI(QMainWindow):
 
     def Scan(self) -> None:
         ''' Сканирование по образующей вниз и вверх от заданных границ '''
-        self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T'])
+        # self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T'])
+        self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T', 'RotGap'])  # TODO Временно с RotGap
 
         line = self.GetData()
 
         self.AbsPositioning()
 
-        start = round(float(self.lEd_Pos_Z.text())*1000)+self.ZeroZ # Координаты точки начала измерений по Z, в мкм
-        distance = round(float(self.lEd_Range_Z.text())*1000) # Дистанция прохода по образующей в мкм
+        start = round(self.dSpBox_Pos_Z.value()*1000)+self.ZeroZ # Координаты точки начала измерений по Z, в мкм
+        distance = round(self.dSpBox_Range_Z.value()*1000) # Дистанция прохода по образующей в мкм
         step = int(self.LinearStep*2000/1000) # Шаг вдоль образующей в импульсах двигателя (2000 имп/мм)
         
         steps = round(distance/self.LinearStep) # Количество шагов на образующую
         finish = start + self.LinearStep*steps # Уточнённое значение нижнего лимита по образующей
 
-        # imp_in_degree = int(self.lEd_Rotation.text()) # Количество импульсов двигателя на угловой градус
         imp_in_degree = 100 # Количество импульсов двигателя на угловой градус
-        # imp_in_mm = round(360*imp_in_degree/(3.14159*int(self.lEd_RotorDiam.text()))) # Количество импульсов двигателя на один мм поверхности вращения
-        rotation = round(float(self.lEd_ScanStepAngle.text())*imp_in_degree)
+        rotation = round(self.dSpBox_ScanStepAngle.value()*imp_in_degree)
 
-        NumberOfRuns = round(float(self.lEd_Range_PHI.text())/(2*round(float(self.lEd_ScanStepAngle.text()), 2))) # Задаём количество шагов по окружности (пополам, потому что вверх-вниз)
-        rotationgap = 0
+        NumberOfRuns = round(self.dSpBox_Range_PHI.value()/(2*self.dSpBox_ScanStepAngle.value())) # TODO math.ceil Задаём количество шагов по окружности (пополам, потому что вверх-вниз)
+        self.rotationgap = 0
         for n in range(NumberOfRuns+1):
             print('Проход номер', n)
 
@@ -630,9 +652,11 @@ class MainUI(QMainWindow):
             self.ScanGeneratrix(steps=steps, step=-step)
 
             # Шаг по окружности
-            realrotation = self.PresizeStepRotor(speed=1, angle=(rotation+rotationgap))
-            rotationgap = round(rotation - realrotation*100 + rotationgap)
+            print(f'Команда на поворот - {rotation+self.rotationgap}')
+            realrotation = self.PresizeStepRotor(speed=1, angle=(rotation+self.rotationgap))
+            self.rotationgap = round(rotation - realrotation*100 + self.rotationgap)
             print('Поворот на угол - ', realrotation)
+            print('Поправка от предыдущего шага - ', self.rotationgap)
 
             time.sleep(1)
 
@@ -660,9 +684,11 @@ class MainUI(QMainWindow):
             self.ScanGeneratrix(steps=steps, step=step)
 
             # Шаг по окружности
-            realrotation = self.PresizeStepRotor(speed=1, angle=(rotation+rotationgap))
-            rotationgap = round(rotation - realrotation*100 + rotationgap)
+            print(f'Команда на поворот - {rotation+self.rotationgap}')
+            realrotation = self.PresizeStepRotor(speed=1, angle=(rotation+self.rotationgap))
+            self.rotationgap = round(rotation - realrotation*100 + self.rotationgap)
             print('Поворот на угол - ', realrotation)
+            print('Поправка от предыдущего шага - ', self.rotationgap)
             
             time.sleep(1)
             
@@ -708,8 +734,12 @@ class MainUI(QMainWindow):
         except ValueError as ve:
             print("Error:", str(ve))
             print(line)
-        except serial.SerialException as se: print("Serial port error:", str(se))
-        except Exception as e:               print("An error occurred:", str(e))
+        except serial.SerialException as se: 
+            print("Serial port error:", str(se))
+            print(line)
+        except Exception as e:               
+            print("An error occurred:", str(e))
+            print(line)
 
         return [0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -760,7 +790,7 @@ class MainUI(QMainWindow):
             json.dump(config_data, config_file)
 
 if __name__ == '__main__':
-    from PyQt5.QtWebEngineWidgets import QWebEngineView # нашел рекомендацию этот импорт делать тут
+    from PyQt5.QtWebEngineWidgets import QWebEngineView # IP: нашел рекомендацию этот импорт делать тут
     # app = QApplication(sys.argv)
     app = QApplication([])
     
