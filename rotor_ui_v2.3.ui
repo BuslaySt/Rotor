@@ -382,7 +382,8 @@
               </font>
              </property>
              <property name="styleSheet">
-              <string notr="true">background-color: salmon</string>
+              <string notr="true">QPushButton {background-color : salmon;}
+QPushButton:hover { background-color: red;}</string>
              </property>
              <property name="text">
               <string>Инициализация двигателей</string>
@@ -427,6 +428,9 @@
         </item>
         <item>
          <widget class="QFrame" name="tab2_frame1">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -974,7 +978,7 @@
            <property name="minimumSize">
             <size>
              <width>100</width>
-             <height>0</height>
+             <height>30</height>
             </size>
            </property>
            <property name="currentText">
@@ -1015,24 +1019,21 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lEd_ScanStepAngle">
+          <widget class="QDoubleSpinBox" name="dSpBox_ScanStepAngle">
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>60</width>
              <height>30</height>
             </size>
            </property>
-           <property name="maximumSize">
-            <size>
-             <width>50</width>
-             <height>16777215</height>
-            </size>
+           <property name="suffix">
+            <string>°</string>
            </property>
-           <property name="text">
-            <string>1.00</string>
+           <property name="maximum">
+            <double>10.000000000000000</double>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="value">
+            <double>1.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1046,7 +1047,7 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>30</width>
+             <width>10</width>
              <height>0</height>
             </size>
            </property>
@@ -1057,7 +1058,7 @@
             </size>
            </property>
            <property name="text">
-            <string>°    =</string>
+            <string>=</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1116,22 +1117,6 @@
          </item>
         </layout>
        </widget>
-       <widget class="QLineEdit" name="lEd_Pos_Z">
-        <property name="geometry">
-         <rect>
-          <x>40</x>
-          <y>80</y>
-          <width>101</width>
-          <height>41</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>0.000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
        <widget class="QPushButton" name="pBtn_Position">
         <property name="geometry">
          <rect>
@@ -1160,22 +1145,6 @@
         </property>
         <property name="text">
          <string>Стоп</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="lEd_Pos_PHI">
-        <property name="geometry">
-         <rect>
-          <x>40</x>
-          <y>30</y>
-          <width>101</width>
-          <height>41</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>0.000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
         </property>
        </widget>
        <widget class="QLabel" name="lbl_coord">
@@ -1230,48 +1199,10 @@
          <string>Размер области сканирования:</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lEd_Range_PHI">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>240</x>
-          <y>30</y>
-          <width>101</width>
-          <height>41</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>360.000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="lEd_Range_Z">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>240</x>
-          <y>80</y>
-          <width>101</width>
-          <height>41</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>100.000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
        <widget class="QLabel" name="lbl_Range_PHI">
         <property name="geometry">
          <rect>
-          <x>210</x>
+          <x>190</x>
           <y>40</y>
           <width>31</width>
           <height>16</height>
@@ -1284,7 +1215,7 @@
        <widget class="QLabel" name="lbl_Range_Z">
         <property name="geometry">
          <rect>
-          <x>200</x>
+          <x>180</x>
           <y>90</y>
           <width>41</width>
           <height>20</height>
@@ -1292,88 +1223,6 @@
         </property>
         <property name="text">
          <string>Высота</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="tab3_lbl_degree">
-        <property name="geometry">
-         <rect>
-          <x>350</x>
-          <y>30</y>
-          <width>15</width>
-          <height>30</height>
-         </rect>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>15</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>15</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>°</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="lbl_tab3_mm1">
-        <property name="geometry">
-         <rect>
-          <x>350</x>
-          <y>90</y>
-          <width>21</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>мм</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="lbl_tab3_mm1_2">
-        <property name="geometry">
-         <rect>
-          <x>150</x>
-          <y>90</y>
-          <width>21</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>мм</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="tab3_lbl_degree_2">
-        <property name="geometry">
-         <rect>
-          <x>150</x>
-          <y>30</y>
-          <width>15</width>
-          <height>30</height>
-         </rect>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>15</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>15</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>°</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
        <widget class="QLabel" name="lbl_Data">
@@ -1387,6 +1236,79 @@
         </property>
         <property name="text">
          <string>Данные онлайн</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="dSpBox_Range_Z">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>80</y>
+          <width>91</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <double>300.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="dSpBox_Range_PHI">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>30</y>
+          <width>91</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="suffix">
+         <string>°</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="dSpBox_Pos_PHI">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>30</y>
+          <width>91</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="suffix">
+         <string>°</string>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="dSpBox_Pos_Z">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>80</y>
+          <width>91</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="minimum">
+         <double>-300.000000000000000</double>
         </property>
        </widget>
       </widget>
