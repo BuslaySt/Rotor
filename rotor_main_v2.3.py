@@ -15,7 +15,7 @@ class MainUI(QMainWindow):
         loadUi("rotor_ui_v2.3.ui", self)
 
         self.LinearSpeed = 100
-        self.RotSpeed = 1
+        self.RotSpeed = 4
 
         try:     # Загрузка параметров из файла конфигурации
             with open('config.json', 'r') as config_file: 
@@ -92,56 +92,10 @@ class MainUI(QMainWindow):
 
         # Окно спирального режима
         self.pBtn_Step.clicked.connect(self.Step)
-        self.pBtn_Turn.clicked.connect(self.SimpleStepRotor)
+        self.pBtn_Turn.clicked.connect(self.Turn)
 
         # Окно вывода результатов
         self.pBtn_Result.clicked.connect(self.ShowGraph)
-
-    if 1:
-        pass
-        # def CheckLinSpeed(self):
-        #     speed = self.lEd_LinearSpeed.text()
-        #     try:
-        #         speed = int(speed)
-        #         if speed > 200:
-        #             message = "Не задавайте скорость каретки более 200"
-        #             print(message)
-        #             self.statusbar.showMessage(message)
-        #             speed = 200
-        #         elif speed <=0:
-        #             message = "Введите целое положительное число"
-        #             print(message)
-        #             self.statusbar.showMessage(message)
-        #             speed = 1
-        #     except ValueError:
-        #         speed = 100
-        #         message = "Введите целое положительное число"
-        #         print(message)
-        #         self.statusbar.showMessage(message)
-        #     finally:
-        #         self.lEd_LinearSpeed.setText(str(speed))
-
-        # def CheckRotSpeed(self):
-        #     speed = self.lEd_RotorSpeed.text()
-        #     try:
-        #         speed = int(speed)
-        #         if speed > 5:
-        #             message = "Не задавайте скорость вращения более 5 об/мин"
-        #             print(message)
-        #             self.statusbar.showMessage(message)
-        #             speed = 5
-        #         elif speed <=0:
-        #             message = "Введите целое положительное число"
-        #             print(message)
-        #             self.statusbar.showMessage(message)
-        #             speed = 1
-        #     except ValueError:
-        #         speed = 1
-        #         message = "Введите целое положительное число"
-        #         print(message)
-        #         self.statusbar.showMessage(message)
-        #     finally:
-        #         self.lEd_RotorSpeed.setText(str(speed))
 
     def SetScanHeight(self) -> None:
         ''' Введённая высота ротора записывается как высота области сканирования '''
@@ -444,16 +398,18 @@ class MainUI(QMainWindow):
 
     def Step(self):
         ''' Функция для кнопки Шаг '''
-        step = 2000 # round(int(self.lEd_Step.text())*2000/1000)
+        step =  self.spBox_Step.value()
+        speed = self.spBox_StepSpeed.value()
         # speed = int(self.lEd_LinearSpeed.text()) 
-        for _ in range(140):
-            print('Шаг на', self.SimpleStepLinear(speed=self.LinearSpeed, step=step))
+        for _ in range(10):
+            print('Шаг на', self.SimpleStepLinear(speed=speed, step=step))
             print(self.GetData()[3:5])
 
     def SimpleStepLinear(self, speed=100, step=2000) -> int:
         ''' Простой шаг по образующей на заданное расстояние '''
         sleepStep = abs(step)/speed/100 # Время на паузу в сек, чтобы мотор успел прокрутиться
-        if sleepStep < 1.0: sleepStep = 1.0
+        print(sleepStep)
+        # if sleepStep < 0.3: sleepStep = 0.3
         Z0 = self.GetData()[3] # Запоминаем начальную позицию
         step *= -1 # Ось линейки направлена вверх, а ось двигателя - вниз, поэтому меняется знак
         if step < 0:
@@ -482,30 +438,35 @@ class MainUI(QMainWindow):
 
         return realstep
 
-    def Rotate(self):
-        ''' Оборот вокруг оси на заданное число градусов (шагов)'''
-        rotationData = pd.Series()
-        rotation = 100
-        line = self.GetData()
-        start = line[5]
+    # def Rotate(self):
+    #     ''' Оборот вокруг оси на заданное число градусов (шагов)'''
+    #     rotationData = pd.Series()
+    #     rotation = 100
+    #     line = self.GetData()
+    #     start = line[5]
+    #     for _ in range(5):
+    #         time1 = time.time()
+    #         realangle = self.SimpleStepRotor(speed=1, angle=rotation)
+    #         rotationData.loc[len(rotationData)] = realangle
+    #         time2 = time.time()
+    #     line = self.GetData()
+    #     finish = line[5]
+    #     rotationData = rotationData.loc[(rotationData>-10)&(rotationData<10)]
+    #     print(rotationData.describe())
+
+    def Turn(self):
+        ''' Функция для кнопки Turn '''
+        turn =  self.spBox_Turn.value()
+        speed = self.spBox_TurnSpeed.value() 
         for _ in range(5):
-            time1 = time.time()
-            realangle = self.SimpleStepRotor(speed=1, angle=rotation)
-            rotationData.loc[len(rotationData)] = realangle
-            time2 = time.time()
-        line = self.GetData()
-        finish = line[5]
-        rotationData = rotationData.loc[(rotationData>-10)&(rotationData<10)]
-        print(rotationData.describe())
+            print('Поворот на', self.SimpleStepRotor(speed=speed, angle=turn))
+            print(self.GetData()[5:7])
 
     def SimpleStepRotor(self, speed=1, angle=100) -> int:
         ''' Простой поворот на заданный угол '''
-        if self.sender() == self.pBtn_Turn:
-            ''' Точный поворот с кнопки Временно '''
-            speed=1
-            angle=100
         sleepStep = abs(angle)/speed/400 # Время на паузу в сек, чтобы мотор успел прокрутиться
-        if sleepStep < 0.5: sleepStep = 0.5
+        print(sleepStep)
+        # if sleepStep < 0.5: sleepStep = 0.5
         PHI0 = self.GetData()[5] # Запоминаем начальный угол
         if angle<0:
             angle = 0xFFFFFFFF+angle
@@ -582,6 +543,7 @@ class MainUI(QMainWindow):
             step  - расстояние между точками, имп (2 имп/мкм)
         '''
         GeneratrixScanStepData = pd.Series()
+        ZerrAlert = False
         line = self.GetData()
         line[3] = round(line[3] - self.ZeroZ)
         line[5] = round(line[5] - self.ZeroPhi, 3)%360
@@ -597,10 +559,14 @@ class MainUI(QMainWindow):
             line[3] = round(line[3] - self.ZeroZ)
             line[5] = round(line[5] - self.ZeroPhi, 3)%360
             self.data.loc[len(self.data)] = line
-            if line[4] > 5:
+            if line[4] <= 5:
+                ZerrAlert = False
+            elif not Zerr and line[4] > 5:
                 message = "Ошибка измерения Zerr больше 5!"
                 print(message)
                 self.statusbar.showMessage(message)
+                ZerrAlert = True
+
         print('Среднее значение шага по образующей:', GeneratrixScanStepData.mean())
 
     def Scan(self) -> None:
