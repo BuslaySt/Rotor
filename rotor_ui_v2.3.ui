@@ -491,6 +491,10 @@ QPushButton:hover { background-color: red;}</string>
                <height>60</height>
               </size>
              </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {background-color : salmon;}
+QPushButton:hover { background-color: red;}</string>
+             </property>
              <property name="text">
               <string>Калибровка</string>
              </property>
