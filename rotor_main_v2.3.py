@@ -130,7 +130,7 @@ class MainUI(QMainWindow):
             self.pBtn_Init.setStyleSheet(   'QPushButton {background-color : forestgreen;}'
                                             'QPushButton:hover { background-color: #45a049;}') 
 
-    def InitRotMotor(self) -> None:
+    def InitRotMotor(self) -> bool:
         try: # Инициализация двигателя вращения ротора
             # Modbus-адрес драйвера по умолчанию - 1
             self.instrumentRotor = minimalmodbus.Instrument(self.cBox_PortMotor.currentText(), 1) #COM9, 1 - вращение, 2 - линейка
@@ -142,7 +142,7 @@ class MainUI(QMainWindow):
             self.instrumentRotor.serial.stopbits = 2
             # self.instrumentRotor.serial.databits = 8
             self.instrumentRotor.serial.timeout  = 0.05          # seconds
-            # self.instrumentRotor.close_port_after_each_call = True
+            self.instrumentRotor.close_port_after_each_call = True
             print(self.instrumentRotor)
             print('Вращение подключено')
         except (IOError, AttributeError, ValueError) as err: # minimalmodbus.serial.serialutil.SerialException:
@@ -153,7 +153,7 @@ class MainUI(QMainWindow):
 
         try:
             # Команда включения серво; 0x0405 - адрес параметра; 0x83 - значение параметра
-            self.instrumentRotor.write_registers(0x00F, [1])
+            self.instrumentRotor.write_register(0x00F, 1)
             return True
         except (IOError, AttributeError, ValueError) as err: # minimalmodbus.serial.serialutil.SerialException:
             message = "Запуск привода вращения не удался, Error: " + str(err)
@@ -161,7 +161,7 @@ class MainUI(QMainWindow):
             self.statusbar.showMessage(message)
             return False
 
-    def InitLinearMotor(self) -> None:
+    def InitLinearMotor(self) -> bool:
         try: # Инициализация двигателя линейки
             # Modbus-адрес драйвера по умолчанию - 1
             self.instrumentLinear = minimalmodbus.Instrument(self.cBox_PortMotor.currentText(), 2) #COM9, 1 - вращение, 2 - линейка
@@ -173,7 +173,7 @@ class MainUI(QMainWindow):
             self.instrumentLinear.serial.stopbits = 2
             # self.instrumentLinear.serial.databits = 8
             self.instrumentLinear.serial.timeout  = 0.05          # seconds
-            # self.instrumentLinear.close_port_after_each_call = True
+            self.instrumentLinear.close_port_after_each_call = True
             print(self.instrumentLinear)
             print('Линейка подключена')
         except (IOError, AttributeError, ValueError) as err: # minimalmodbus.serial.serialutil.SerialException:
@@ -184,7 +184,7 @@ class MainUI(QMainWindow):
 
         try:
             # Команда включения серво; 0x0405 - адрес параметра; 0x83 - значение параметра
-            self.instrumentLinear.write_registers(0x00F, [1])
+            self.instrumentLinear.write_register(0x00F, 1)
             return True
         except (IOError, AttributeError, ValueError) as err: # minimalmodbus.serial.serialutil.SerialException:
             message = "Запуск привода линейки не удался, Error: " + str(err)
@@ -194,9 +194,40 @@ class MainUI(QMainWindow):
 
     def Calibrate(self):
         ''' Калибровка позиционирования поворотом на 360 и перемещением вверх-вниз до концевиков '''
-        self.SimpleStepRotor(speed=5, angle=36000)
-        
-        # self.MoveUpDown()
+        try:
+            self.RotateCW()
+
+            self.LinearMotionUp()
+            while self.instrumentLinear.read_register(0x0179) != 1:
+                time.sleep(0.5)
+
+            self.LinearMotionDown()
+            while self.instrumentLinear.read_register(0x0179) != 2:
+                time.sleep(0.5)
+
+            self.StopLinear()
+
+            while self.GetData()[6] == "NULL":
+                time.sleep(0.5)
+            
+            self.StopRotor()
+            
+            line = self.GetData()
+            if (line[4] != 'NULL') and (line[6] != 'NULL'):
+                message = 'Калибровка завершена успешно'
+                print(message)
+                self.statusbar.showMessage(message)
+                self.pBtn_Calibrate.setStyleSheet('QPushButton {background-color : forestgreen;}'
+                                                'QPushButton:hover { background-color: #45a049;}')
+            else:
+                message = 'Повторите калибровку'
+                print(message)
+                self.statusbar.showMessage(message)
+                print(line)
+        except (IOError, AttributeError, ValueError): # minimalmodbus.serial.serialutil.SerialException:
+            message = "Подключите приводы"
+            print(message)
+            self.statusbar.showMessage(message)
 
     def RotateCW(self) -> None:
         # try:
@@ -256,14 +287,6 @@ class MainUI(QMainWindow):
             self.statusbar.showMessage(message)
 
     def LinearMotionDown(self) -> None:
-        # try:
-        #     speed = int(self.lEd_LinearSpeed.text())
-        # except ValueError:
-        #     speed = 100
-        #     self.lEd_LinearSpeed.setText('100')
-        #     message = "Скорость задана неверно"
-        #     print(message)
-        #     self.statusbar.showMessage(message)
         try:
             '''
             Формирование массива параметров для команды:
@@ -278,26 +301,18 @@ class MainUI(QMainWindow):
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, self.LinearSpeed*2, 0x0064, 0x0064, 0x0000, 0x0010])
+            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, 200, 0x0064, 0x0064, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
             self.statusbar.showMessage(message)
 
     def LinearMotionUp(self) -> None:
-        # try:
-        #     speed = 65536-int(self.lEd_LinearSpeed.text())
-        # except ValueError:
-        #     speed = 65536-100
-        #     self.lEd_LinearSpeed.setText('100')
-        #     message = "Скорость задана неверно"
-        #     print(message)
-        #     self.statusbar.showMessage(message)
         try:
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, 65536-self.LinearSpeed*2, 0x0064, 0x0064, 0x0000, 0x0010])
+            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, 65536-200, 0x0064, 0x0064, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
@@ -561,7 +576,7 @@ class MainUI(QMainWindow):
             self.data.loc[len(self.data)] = line
             if line[4] <= 5:
                 ZerrAlert = False
-            elif not Zerr and line[4] > 5:
+            elif not ZerrAlert and line[4] > 5:
                 message = "Ошибка измерения Zerr больше 5!"
                 print(message)
                 self.statusbar.showMessage(message)
