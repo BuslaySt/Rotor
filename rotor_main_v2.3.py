@@ -86,11 +86,14 @@ class MainUI(QMainWindow):
         self.cBox_ScanStepGeneratrix.setCurrentIndex(1)
         self.LinearStep = 1000 # 1mm default
         self.cBox_ScanStepGeneratrix.currentIndexChanged.connect(self.SetupScanStepGeneratrix)
-        self.pBtn_Position.clicked.connect(self.AbsPositioning)
+        self.pBtn_Position.clicked.connect(self.AbsPosition)
         self.dSpBox_ScanStepAngle.textChanged.connect(self.Angle2MM)
         self.pBtn_ScanGeneratrix.clicked.connect(self.Scan)
 
         # Окно спирального режима
+        self.pBtn_ScanRotorSpiral.clicked.connect(self.ScanRotorFast)
+
+        # Test buttons
         self.pBtn_Step.clicked.connect(self.Step)
         self.pBtn_Turn.clicked.connect(self.Turn)
 
@@ -195,23 +198,24 @@ class MainUI(QMainWindow):
     def Calibrate(self):
         ''' Калибровка позиционирования поворотом на 360 и перемещением вверх-вниз до концевиков '''
         try:
-            self.RotateCW()
-
-            self.LinearMotionUp()
-            while self.instrumentLinear.read_register(0x0179) != 1:
+            # Калибровка вращения
+            if self.GetData()[6] == "NULL":
+                self.RotateCW()
+                while self.GetData()[6] == "NULL":
+                    time.sleep(0.5)
+                self.StopRotor()
                 time.sleep(0.5)
 
-            self.LinearMotionDown()
-            while self.instrumentLinear.read_register(0x0179) != 2:
-                time.sleep(0.5)
+            # Калибровка линейного перемещения
+            if self.GetData()[4] == "NULL":
+                self.LinearMotionUp() # Вверх
+                while self.instrumentLinear.read_register(0x0179) != 1:
+                    time.sleep(0.5)
+                self.LinearMotionDown() # Вниз
+                while self.instrumentLinear.read_register(0x0179) != 2:
+                    time.sleep(0.5)
+                self.StopLinear()
 
-            self.StopLinear()
-
-            while self.GetData()[6] == "NULL":
-                time.sleep(0.5)
-            
-            self.StopRotor()
-            
             line = self.GetData()
             if (line[4] != 'NULL') and (line[6] != 'NULL'):
                 message = 'Калибровка завершена успешно'
@@ -229,7 +233,7 @@ class MainUI(QMainWindow):
             print(message)
             self.statusbar.showMessage(message)
 
-    def RotateCW(self) -> None:
+    def RotateCW(self, speed=5) -> None:
         # try:
         #     speed = int(self.lEd_RotorSpeed.text())
         # except ValueError:
@@ -251,13 +255,13 @@ class MainUI(QMainWindow):
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentRotor.write_registers(0x6200, [0x0002, 0x0000, 0x0000, self.RotSpeed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+            self.instrumentRotor.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
             self.statusbar.showMessage(message)
 
-    def RotateCCW(self) -> None:
+    def RotateCCW(self, speed=5) -> None:
         # try:
         #     speed = 65536-int(self.lEd_RotorSpeed.text())
         # except ValueError:
@@ -266,6 +270,7 @@ class MainUI(QMainWindow):
         #     message = "Скорость задана неверно"
         #     print(message)
         #     self.statusbar.showMessage(message)
+        speed = 65536-speed
         try:
             '''
             Формирование массива параметров для команды:
@@ -280,13 +285,13 @@ class MainUI(QMainWindow):
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentRotor.write_registers(0x6200, [0x0002, 0x0000, 0x0000, 65536-self.RotSpeed, 0x03E8, 0x03E8, 0x0000, 0x0010])
+            self.instrumentRotor.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x03E8, 0x03E8, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
             self.statusbar.showMessage(message)
 
-    def LinearMotionDown(self) -> None:
+    def LinearMotionDown(self, speed=200) -> None:
         try:
             '''
             Формирование массива параметров для команды:
@@ -301,18 +306,18 @@ class MainUI(QMainWindow):
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, 200, 0x0064, 0x0064, 0x0000, 0x0010])
+            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, speed, 0x0064, 0x0064, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
             self.statusbar.showMessage(message)
 
-    def LinearMotionUp(self) -> None:
+    def LinearMotionUp(self, speed=200) -> None:
         try:
             message = "Движение запущено"
             print(message)
             self.statusbar.showMessage(message)
-            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, 65536-200, 0x0064, 0x0064, 0x0000, 0x0010])
+            self.instrumentLinear.write_registers(0x6200, [0x0002, 0x0000, 0x0000, 65536-speed, 0x0064, 0x0064, 0x0000, 0x0010])
         except (IOError, AttributeError, ValueError):
             message = "Команда для движения не прошла"
             print(message)
@@ -341,7 +346,7 @@ class MainUI(QMainWindow):
             print(message)
             self.statusbar.showMessage(message)      
 
-    def AbsPositioning(self) -> None:
+    def AbsPosition(self) -> None:
         Zpos = int(self.dSpBox_Pos_Z.value()*1000) # Считываем мм, переводим в мкм и округляем до целого
         self.LinearPositioning(Zpos+self.ZeroZ)
         PHIpos = self.dSpBox_Pos_PHI.value() # Угловое положение в градусах с точностью до 3-го знака
@@ -423,8 +428,7 @@ class MainUI(QMainWindow):
     def SimpleStepLinear(self, speed=100, step=2000) -> int:
         ''' Простой шаг по образующей на заданное расстояние '''
         sleepStep = abs(step)/speed/100 # Время на паузу в сек, чтобы мотор успел прокрутиться
-        print(sleepStep)
-        # if sleepStep < 0.3: sleepStep = 0.3
+        if sleepStep < 0.2: sleepStep = 0.2
         Z0 = self.GetData()[3] # Запоминаем начальную позицию
         step *= -1 # Ось линейки направлена вверх, а ось двигателя - вниз, поэтому меняется знак
         if step < 0:
@@ -453,22 +457,6 @@ class MainUI(QMainWindow):
 
         return realstep
 
-    # def Rotate(self):
-    #     ''' Оборот вокруг оси на заданное число градусов (шагов)'''
-    #     rotationData = pd.Series()
-    #     rotation = 100
-    #     line = self.GetData()
-    #     start = line[5]
-    #     for _ in range(5):
-    #         time1 = time.time()
-    #         realangle = self.SimpleStepRotor(speed=1, angle=rotation)
-    #         rotationData.loc[len(rotationData)] = realangle
-    #         time2 = time.time()
-    #     line = self.GetData()
-    #     finish = line[5]
-    #     rotationData = rotationData.loc[(rotationData>-10)&(rotationData<10)]
-    #     print(rotationData.describe())
-
     def Turn(self):
         ''' Функция для кнопки Turn '''
         turn =  self.spBox_Turn.value()
@@ -480,8 +468,7 @@ class MainUI(QMainWindow):
     def SimpleStepRotor(self, speed=1, angle=100) -> int:
         ''' Простой поворот на заданный угол '''
         sleepStep = abs(angle)/speed/400 # Время на паузу в сек, чтобы мотор успел прокрутиться
-        print(sleepStep)
-        # if sleepStep < 0.5: sleepStep = 0.5
+        if sleepStep < 0.5: sleepStep = 0.5
         PHI0 = self.GetData()[5] # Запоминаем начальный угол
         if angle<0:
             angle = 0xFFFFFFFF+angle
@@ -560,7 +547,9 @@ class MainUI(QMainWindow):
         GeneratrixScanStepData = pd.Series()
         ZerrAlert = False
         line = self.GetData()
+        print('Z1=', line[3])
         line[3] = round(line[3] - self.ZeroZ)
+        print('Z2=', line[3])
         line[5] = round(line[5] - self.ZeroPhi, 3)%360
         self.data.loc[len(self.data)] = line
         step *= -1 # Меняем знак, потому что ось двигателя и ось энкодера разнонаправлены
@@ -576,8 +565,8 @@ class MainUI(QMainWindow):
             self.data.loc[len(self.data)] = line
             if line[4] <= 5:
                 ZerrAlert = False
-            elif not ZerrAlert and line[4] > 5:
-                message = "Ошибка измерения Zerr больше 5!"
+            elif not ZerrAlert and line[4] > 30:
+                message = "Ошибка измерения Zerr больше 30!"
                 print(message)
                 self.statusbar.showMessage(message)
                 ZerrAlert = True
@@ -590,7 +579,7 @@ class MainUI(QMainWindow):
 
         line = self.GetData()
 
-        self.AbsPositioning()
+        self.AbsPosition()
 
         start = round(self.dSpBox_Pos_Z.value()*1000)+self.ZeroZ # Координаты точки начала измерений по Z, в мкм
         distance = round(self.dSpBox_Range_Z.value()*1000) # Дистанция прохода по образующей в мкм
@@ -668,8 +657,58 @@ class MainUI(QMainWindow):
             # print('Нижняя координата', line[3])
             shift = start-line[3]
 
+        self.data['Zx'] = self.data['Z'] + 2000
+        self.data['Zy'] = self.data['Z']
+        self.data['Zz'] = self.data['Z'] - 2000
+        self.data = self.data[['Bx', 'By', 'Bz', 'Zx', 'Zy', 'Zz', 'Zerr', 'PHI', 'PHIerr', 'T']]
+        # self.data.reindex(columns=['Bx', 'By', 'Bz', 'Zx', 'Zy', 'Zz', 'Zerr', 'PHI', 'PHIerr', 'T'])
         filename = time.strftime("%Y-%m-%d_%H-%M")
         self.data.to_csv(f"data_{filename}.csv")
+        
+        message = "Съёмка завершена!"
+        print(message)
+        self.statusbar.showMessage(message)
+
+    def ScanRotorFast(self) -> None:
+        ''' Сканирование поверхности ротора '''
+        self.data = pd.DataFrame(columns=['Bx', 'By', 'Bz', 'Z', 'Zerr', 'PHI', 'PHIerr', 'T'])
+
+        # self.AbsPosition()
+        line = self.GetData()
+        start = line[3]
+        print('Start:', start)
+        finish = int(line[3]+self.dSpBox_Range_Z_spiral.value()*1000)
+        print('Finish:', finish)
+        line[3] = round(line[3] - self.ZeroZ)
+        line[5] = round(line[5] - self.ZeroPhi, 3)%360
+        self.data.loc[len(self.data)] = line
+
+        self.RotateCW(speed=5)
+        self.LinearMotionUp(speed=1)
+
+        scan = True
+        while scan:
+            line = self.GetData()
+            print('Z:', line[3])
+            if line[3] > finish:
+                scan = False
+            line[3] = round(line[3] - self.ZeroZ)
+            line[5] = round(line[5] - self.ZeroPhi, 3)%360
+            self.data.loc[len(self.data)] = line
+            time.sleep(1)
+
+        self.StopRotor()
+        self.StopLinear()
+
+        print('Конец сканирования!')
+        self.data['Zx'] = self.data['Z'] + 2000
+        self.data['Zy'] = self.data['Z']
+        self.data['Zz'] = self.data['Z'] - 2000
+        self.data = self.data[['Bx', 'By', 'Bz', 'Zx', 'Zy', 'Zz', 'Zerr', 'PHI', 'PHIerr', 'T']]
+        # self.data.reindex(columns=['Bx', 'By', 'Bz', 'Zx', 'Zy', 'Zz', 'Zerr', 'PHI', 'PHIerr', 'T'])
+        filename = time.strftime("%Y-%m-%d_%H-%M")
+        self.data.to_csv(f"qdata_{filename}.csv")
+        
         message = "Съёмка завершена!"
         print(message)
         self.statusbar.showMessage(message)
