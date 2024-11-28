@@ -508,7 +508,7 @@ QPushButton:hover { background-color: red;}</string>
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>80</height>
+            <height>0</height>
            </size>
           </property>
           <property name="frameShape">
@@ -546,6 +546,12 @@ QPushButton:hover { background-color: red;}</string>
               <iconset>
                <normaloff>arrow_up.png</normaloff>arrow_up.png</iconset>
              </property>
+             <property name="iconSize">
+              <size>
+               <width>25</width>
+               <height>25</height>
+              </size>
+             </property>
             </widget>
            </item>
            <item>
@@ -569,7 +575,7 @@ QPushButton:hover { background-color: red;}</string>
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>80</height>
+            <height>0</height>
            </size>
           </property>
           <property name="frameShape">
@@ -607,6 +613,12 @@ QPushButton:hover { background-color: red;}</string>
               <iconset>
                <normaloff>arrow_left.png</normaloff>arrow_left.png</iconset>
              </property>
+             <property name="iconSize">
+              <size>
+               <width>25</width>
+               <height>25</height>
+              </size>
+             </property>
             </widget>
            </item>
            <item>
@@ -637,6 +649,12 @@ QPushButton:hover { background-color: red;}</string>
               <iconset>
                <normaloff>arrow_right.png</normaloff>arrow_right.png</iconset>
              </property>
+             <property name="iconSize">
+              <size>
+               <width>25</width>
+               <height>25</height>
+              </size>
+             </property>
             </widget>
            </item>
            <item>
@@ -660,13 +678,13 @@ QPushButton:hover { background-color: red;}</string>
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>80</height>
+            <height>0</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>70</height>
+            <height>16777215</height>
            </size>
           </property>
           <property name="frameShape">
@@ -691,10 +709,22 @@ QPushButton:hover { background-color: red;}</string>
            </item>
            <item>
             <widget class="QPushButton" name="pBtn_MoveDown">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>200</width>
                <height>70</height>
+              </size>
+             </property>
+             <property name="baseSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
               </size>
              </property>
              <property name="text">
@@ -703,6 +733,12 @@ QPushButton:hover { background-color: red;}</string>
              <property name="icon">
               <iconset>
                <normaloff>arrow_down.png</normaloff>arrow_down.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>25</width>
+               <height>25</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -1214,66 +1250,222 @@ QPushButton:hover { background-color: red;}</string>
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="tab4_fast">
+      <widget class="QWidget" name="tab4_fast_spiral">
        <property name="enabled">
         <bool>true</bool>
        </property>
        <attribute name="title">
         <string>Спиральный режим</string>
        </attribute>
-       <widget class="QPushButton" name="pBtn_Turn">
+       <widget class="QLabel" name="lbl_range_spiral">
         <property name="geometry">
          <rect>
-          <x>90</x>
-          <y>150</y>
-          <width>141</width>
-          <height>101</height>
+          <x>210</x>
+          <y>10</y>
+          <width>161</width>
+          <height>16</height>
          </rect>
         </property>
         <property name="text">
-         <string>Turn</string>
+         <string>Размер области сканирования:</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pBtn_Step">
+       <widget class="QDoubleSpinBox" name="dSpBox_Range_Z_spiral">
         <property name="geometry">
          <rect>
-          <x>250</x>
-          <y>150</y>
-          <width>141</width>
-          <height>101</height>
+          <x>220</x>
+          <y>80</y>
+          <width>91</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-300000.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>300000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>10.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="dSpBox_Pos_Z_spiral">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>80</y>
+          <width>91</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="minimum">
+         <double>-300.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_coord_1_spiral">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>161</width>
+          <height>16</height>
          </rect>
         </property>
         <property name="text">
-         <string>Step</string>
+         <string>Координаты начальной точки:</string>
         </property>
        </widget>
-       <widget class="QSpinBox" name="spBox_Step">
+       <widget class="QLabel" name="lbl_Pos_PHI_spiral">
         <property name="geometry">
          <rect>
-          <x>250</x>
-          <y>110</y>
-          <width>141</width>
+          <x>10</x>
+          <y>35</y>
+          <width>21</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Phi=</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="dSpBox_Range_PHI_spiral">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>30</y>
+          <width>91</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="suffix">
+         <string>°</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_Pos_Z_spiral">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>85</y>
+          <width>21</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Z=</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="dSpBox_Pos_PHI_spiral">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>30</y>
+          <width>91</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="suffix">
+         <string>°</string>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_Range_PHI_spiral">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>35</y>
+          <width>31</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Угол</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_Range_Z_spiral">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>79</y>
+          <width>41</width>
           <height>31</height>
          </rect>
         </property>
-        <property name="minimum">
-         <number>-500000</number>
-        </property>
-        <property name="maximum">
-         <number>500000</number>
-        </property>
-        <property name="singleStep">
-         <number>1000</number>
-        </property>
-        <property name="value">
-         <number>2000</number>
+        <property name="text">
+         <string>Высота</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="pBtn_AbsPosition_spiral">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>130</y>
+          <width>151</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Перевести каретку
+в начало</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pBtn_ScanRotorSpiral">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>190</y>
+          <width>151</width>
+          <height>71</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Старт</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Page</string>
+       </attribute>
        <widget class="QSpinBox" name="spBox_Turn">
         <property name="geometry">
          <rect>
-          <x>90</x>
-          <y>110</y>
+          <x>100</x>
+          <y>100</y>
           <width>141</width>
           <height>31</height>
          </rect>
@@ -1291,11 +1483,24 @@ QPushButton:hover { background-color: red;}</string>
          <number>100</number>
         </property>
        </widget>
+       <widget class="QPushButton" name="pBtn_Turn">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>140</y>
+          <width>141</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Turn</string>
+        </property>
+       </widget>
        <widget class="QSpinBox" name="spBox_StepSpeed">
         <property name="geometry">
          <rect>
-          <x>250</x>
-          <y>70</y>
+          <x>260</x>
+          <y>60</y>
           <width>141</width>
           <height>31</height>
          </rect>
@@ -1310,11 +1515,46 @@ QPushButton:hover { background-color: red;}</string>
          <number>100</number>
         </property>
        </widget>
+       <widget class="QPushButton" name="pBtn_Step">
+        <property name="geometry">
+         <rect>
+          <x>260</x>
+          <y>140</y>
+          <width>141</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Step</string>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="spBox_Step">
+        <property name="geometry">
+         <rect>
+          <x>260</x>
+          <y>100</y>
+          <width>141</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <number>-500000</number>
+        </property>
+        <property name="maximum">
+         <number>500000</number>
+        </property>
+        <property name="singleStep">
+         <number>1000</number>
+        </property>
+        <property name="value">
+         <number>2000</number>
+        </property>
+       </widget>
        <widget class="QSpinBox" name="spBox_TurnSpeed">
         <property name="geometry">
          <rect>
-          <x>90</x>
-          <y>70</y>
+          <x>100</x>
+          <y>60</y>
           <width>141</width>
           <height>31</height>
          </rect>
@@ -1324,6 +1564,58 @@ QPushButton:hover { background-color: red;}</string>
         </property>
         <property name="maximum">
          <number>5</number>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>70</y>
+          <width>47</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Скорость</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_2">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>110</y>
+          <width>47</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Шаг</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_3">
+        <property name="geometry">
+         <rect>
+          <x>140</x>
+          <y>30</y>
+          <width>61</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Вращение</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>300</x>
+          <y>30</y>
+          <width>61</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Линейное</string>
         </property>
        </widget>
       </widget>
