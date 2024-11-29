@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.uic import loadUi
-# from PyQt5.QtWebEngineWidgets import QWebEngineView
 import sys, datetime, time, json, os
 import minimalmodbus, serial, threading
 import serial.tools.list_ports
@@ -210,6 +209,7 @@ class MainUI(QMainWindow):
             return False
 
     def CalibrateThread(self) -> None:
+        ''' Калибровка позиционирования поворотом на 360 и перемещением вверх-вниз до концевиков '''
         self.thread1 = threading.Thread(target=self.Calibrate)
         self.thread1.start()
 
@@ -323,10 +323,12 @@ class MainUI(QMainWindow):
             self.statusbar.showMessage(message)
 
     def AbsPositionThread(self) -> None:
+        ''' Перемещение каретки в заданные координаты Zpos PHIpos '''
         self.thread4 = threading.Thread(target=self.AbsPosition)
         self.thread4.start()
 
     def AbsPosition(self) -> None:
+        ''' Перемещение каретки в заданные координаты Zpos PHIpos '''
         Zpos = int(self.dSpBox_Pos_Z.value()*1000) # Считываем мм, переводим в мкм и округляем до целого
         self.LinearPositioning(Zpos+self.ZeroZ)
         PHIpos = self.dSpBox_Pos_PHI.value() # Угловое положение в градусах с точностью до 3-го знака
@@ -530,6 +532,7 @@ class MainUI(QMainWindow):
         print('Среднее значение шага по образующей:', GeneratrixScanStepData.mean())
 
     def ScanThread(self) -> None:
+        ''' Сканирование по образующей вниз и вверх от заданных границ '''
         self.thread2 = threading.Thread(target=self.Scan)
         self.thread2.start()
 
@@ -639,6 +642,7 @@ class MainUI(QMainWindow):
         self.pBtn_ScanGeneratrixStop.setStyleSheet('QPushButton {background-color : #E1E1E1;}'
                                                    'QPushButton:hover { background-color: salmon;}')
         
+        # Сохранение датафрейма в файл
         self.data['Zx'] = self.data['Z'] + 2000
         self.data['Zy'] = self.data['Z']
         self.data['Zz'] = self.data['Z'] - 2000
@@ -651,6 +655,7 @@ class MainUI(QMainWindow):
         self.statusbar.showMessage(message)
 
     def ScanRotorFastThread(self) -> None:
+        ''' Сканирование поверхности ротора в спиральном режиме '''
         self.thread3 = threading.Thread(target=self.ScanRotorFast)
         self.thread3.start()
 
@@ -707,7 +712,7 @@ class MainUI(QMainWindow):
         self.statusbar.showMessage(message)
 
     def ShowData(self) -> None:
-        ''' Отражение данных в GUI '''
+        ''' Отражение данных с дата-порта в GUI '''
         line = self.GetData()
         text = ''.join(['B = ', str(line[:3]), '\nZ = ', str(line[3:5]), '\nPhi=', str(line[5:7]), '\nT = ', str(line[7:])])
         self.txtBrwser_ShowData.setText(text)
@@ -803,13 +808,8 @@ class MainUI(QMainWindow):
             ),
         )
         offline.plot(figure, filename = self.filename, auto_open = True)
-        #self.view = QWebEngineView()
-        #self.view.load(QUrl.fromLocalFile(self.filename))
-        #self.setCentralWidget(self.view)
  
     def LayersSum(self):
-        #self.data = pd.read_csv('data_2024-11-27_11-23.csv')
-        
         self.TrueZ()
         layersSum = len(self.uniq_Z)
         self.lbl_LayersSum.setText(str(layersSum))
