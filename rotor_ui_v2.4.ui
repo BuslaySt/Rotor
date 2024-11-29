@@ -865,6 +865,9 @@ QPushButton:hover { background-color: red;}</string>
           <height>71</height>
          </rect>
         </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton:hover { background-color: #66FF66;}</string>
+        </property>
         <property name="text">
          <string>Старт</string>
         </property>
@@ -1069,20 +1072,27 @@ QPushButton:hover { background-color: red;}</string>
 в начало</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pBtn_ScanAround">
+       <widget class="QPushButton" name="pBtn_ScanGeneratrixStop">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="geometry">
          <rect>
-          <x>200</x>
+          <x>170</x>
           <y>270</y>
           <width>131</width>
           <height>71</height>
          </rect>
         </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton:checked { background-color: red;}
+QPushButton:hover { background-color: salmon;}</string>
+        </property>
         <property name="text">
          <string>Стоп</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
        <widget class="QLabel" name="lbl_coord">
@@ -1164,6 +1174,9 @@ QPushButton:hover { background-color: red;}</string>
         </property>
        </widget>
        <widget class="QLabel" name="lbl_Data">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -1173,7 +1186,7 @@ QPushButton:hover { background-color: red;}</string>
          </rect>
         </property>
         <property name="text">
-         <string>Данные онлайн</string>
+         <string/>
         </property>
        </widget>
        <widget class="QDoubleSpinBox" name="dSpBox_Range_Z">
@@ -1211,6 +1224,9 @@ QPushButton:hover { background-color: red;}</string>
          <number>3</number>
         </property>
         <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="value">
          <double>360.000000000000000</double>
         </property>
        </widget>
@@ -1260,8 +1276,8 @@ QPushButton:hover { background-color: red;}</string>
        <widget class="QDoubleSpinBox" name="dSpBox_Range_Z_spiral">
         <property name="geometry">
          <rect>
-          <x>190</x>
-          <y>81</y>
+          <x>120</x>
+          <y>111</y>
           <width>91</width>
           <height>30</height>
          </rect>
@@ -1285,8 +1301,8 @@ QPushButton:hover { background-color: red;}</string>
        <widget class="QLabel" name="lbl_Range_Z_spiral">
         <property name="geometry">
          <rect>
-          <x>150</x>
-          <y>80</y>
+          <x>80</x>
+          <y>110</y>
           <width>41</width>
           <height>31</height>
          </rect>
@@ -1298,14 +1314,40 @@ QPushButton:hover { background-color: red;}</string>
        <widget class="QPushButton" name="pBtn_ScanRotorSpiral">
         <property name="geometry">
          <rect>
-          <x>140</x>
-          <y>140</y>
+          <x>70</x>
+          <y>170</y>
           <width>151</width>
           <height>71</height>
          </rect>
         </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton:hover { background-color: #66FF66;}</string>
+        </property>
         <property name="text">
          <string>Старт</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pBtn_ScanRotorSpiralStop">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>230</x>
+          <y>170</y>
+          <width>151</width>
+          <height>71</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton:checked { background-color: red;}
+QPushButton:hover { background-color: salmon;}</string>
+        </property>
+        <property name="text">
+         <string>Стоп</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </widget>
