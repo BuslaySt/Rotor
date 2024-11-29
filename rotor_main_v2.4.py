@@ -59,6 +59,7 @@ class MainUI(QMainWindow):
         self.ZeroPhi = config_data['ZeroPhi']
         self.ZeroZ = config_data['ZeroZ']
 
+        self.SetScanHeight()
         self.lEd_RotorDiam.editingFinished.connect(self.Angle2MM)
         self.lEd_RotorHght.editingFinished.connect(self.SetScanHeight)
         
@@ -90,12 +91,13 @@ class MainUI(QMainWindow):
         self.cBox_ScanStepGeneratrix.setCurrentIndex(1)
         self.LinearStep = 1000 # 1mm default
         self.cBox_ScanStepGeneratrix.currentIndexChanged.connect(self.SetupScanStepGeneratrix)
-        self.pBtn_Position.clicked.connect(self.AbsPosition)
+        self.pBtn_Position.clicked.connect(self.AbsPositionThread)
         self.dSpBox_ScanStepAngle.textChanged.connect(self.Angle2MM)
-        self.pBtn_ScanGeneratrix.clicked.connect(self.Scan)
+        self.pBtn_ScanGeneratrix.clicked.connect(self.ScanThread)
+        self.pBtn_ScanGeneratrixStop.clicked.connect(self.Stop)
 
         # Окно спирального режима
-        self.pBtn_ScanRotorSpiral.clicked.connect(self.ScanRotorFast)
+        self.pBtn_ScanRotorSpiral.clicked.connect(self.ScanRotorFastThread)
 
         # Окно вывода результатов
         self.cBox_FieldComponent.addItems(['Bx', 'By', 'Bz'])
@@ -140,8 +142,8 @@ class MainUI(QMainWindow):
     def Init(self) -> None:
         ''' Запускается инициализация двигателей вращения и линейки, если удачно, кнопка зеленеет '''
         if self.InitRotMotor() and self.InitLinearMotor():
-            self.pBtn_Init.setStyleSheet(   'QPushButton {background-color : forestgreen;}'
-                                            'QPushButton:hover { background-color: #45a049;}') 
+            self.pBtn_Init.setStyleSheet('QPushButton {background-color : forestgreen;}'
+                                         'QPushButton:hover { background-color: #45a049;}') 
 
     def InitRotMotor(self) -> bool:
         ''' Инициализация двигателя вращения ротора '''
@@ -320,29 +322,9 @@ class MainUI(QMainWindow):
             print(message)
             self.statusbar.showMessage(message)
 
-    def AbsMotion(self) -> None:
-        pass
-        # ''' Перемещение в заданные координаты в системе отсчётов двигателя'''
-        # coord1, coord2 = divmod(int(self.lEd_Pos.text()), 0x10000) # Разбиваем координату на два регистра
-        # try:
-        #     # Формирование массива параметров для команды:
-        #     # 0x0002 - режим управления скоростью, записывается по адресу 0x6200
-        #     # 0x0000 - верхние два байта кол-ва оборотов (=0 для режима управления скоростью), записывается по адресу 0x6201
-        #     # 0x0000 - нижние два байта кол-ва оборотов  (=0 для режима управления скоростью), записывается по адресу 0x6202
-        #     # 0x03E8 - значение скорости вращения (1000 об/мин), записывается по адресу 0x6203
-        #     # 0x03E8 - значение времени ускорения (1000 мс), записывается по адресу 0x6204
-        #     # 0x03E8 - значение времени торможения (1000 мс), записывается по адресу 0x6205
-        #     # 0x0000 - задержка перед началом движения (0 мс), записывается по адресу 0x6206
-        #     # 0x0010 - значение триггера для начала движения, записывается по адресу 0x6207
-        #     message = "Движение запущено"
-        #     print(message)
-        #     self.statusbar.showMessage(message)
-        #     self.instrumentLinear.write_registers(0x6200, [0x0001, coord1, coord2, 200, 1000, 1000, 0, 0x0010])
-
-        # except (IOError, AttributeError, ValueError):
-        #     message = "Команда для движения не прошла"
-        #     print(message)
-        #     self.statusbar.showMessage(message)      
+    def AbsPositionThread(self) -> None:
+        self.thread4 = threading.Thread(target=self.AbsPosition)
+        self.thread4.start()
 
     def AbsPosition(self) -> None:
         Zpos = int(self.dSpBox_Pos_Z.value()*1000) # Считываем мм, переводим в мкм и округляем до целого
@@ -359,6 +341,8 @@ class MainUI(QMainWindow):
         print('Перемещение по образующей')
         count = 0
         while abs(distance) > 1 and count < 3:
+            if self.pBtn_ScanGeneratrixStop.isChecked():
+                break
             self.SimpleStepLinear(speed=100, step=-1*int(distance*2))
             line = self.GetData()
             distance = line[3] - Zpos
@@ -379,28 +363,14 @@ class MainUI(QMainWindow):
             turnspeed = 1
         count = 0
         while abs(distance*100) > 2 and count < 2:
+            if self.pBtn_ScanGeneratrixStop.isChecked():
+                break
             self.SimpleStepRotor(speed=turnspeed, angle=round(distance*100))
             line = self.GetData()
             distance = (PHIpos-line[5])%360
             if 180 < distance < 360: distance -= 360
             turnspeed = 1
             count += 1
-
-    def SetUpperLimit(self) -> None:
-        pass
-        # self.UpperLimit = int(self.GetData()[3])
-        # message = "".join(["Установлена верхняя граница ротора - ", str(self.UpperLimit)])
-        # print(message)
-        # self.statusbar.showMessage(message)
-        # self.pBtn_UpperLimit.setText("".join(["Верхняя граница ротора: ", str(self.UpperLimit)]))
-
-    def SetLowerLimit(self) -> None:
-        pass
-        # self.LowerLimit = int(self.GetData()[3])
-        # message = "".join(["Установлена нижняя граница ротора - ", str(self.LowerLimit)])
-        # print(message)
-        # self.statusbar.showMessage(message)
-        # self.pBtn_LowerLimit.setText("".join(["Нижняя граница ротора: ", str(self.LowerLimit)]))
 
     def SetZeroPhi(self) -> None:
         ''' Задать нулевую точку отсчёта по вращению '''
@@ -417,16 +387,6 @@ class MainUI(QMainWindow):
         message = ''.join(["Установлено начало координат по образующей - ", str(self.ZeroZ)])
         print(message)
         self.statusbar.showMessage(message)
-
-    def Step(self):
-        ''' Функция для кнопки Шаг '''
-        pass
-        # step =  self.spBox_Step.value()
-        # speed = self.spBox_StepSpeed.value()
-        # # speed = int(self.lEd_LinearSpeed.text()) 
-        # for _ in range(10):
-        #     print('Шаг на', self.SimpleStepLinear(speed=speed, step=step))
-        #     print(self.GetData()[3:5])
 
     def SimpleStepLinear(self, speed=100, step=2000) -> int:
         ''' Простой шаг по образующей на заданное расстояние '''
@@ -459,15 +419,6 @@ class MainUI(QMainWindow):
             realstep = 0
 
         return realstep
-
-    def Turn(self):
-        ''' Функция для кнопки Turn '''
-        pass
-        # turn =  self.spBox_Turn.value()
-        # speed = self.spBox_TurnSpeed.value() 
-        # for _ in range(5):
-        #     print('Поворот на', self.SimpleStepRotor(speed=speed, angle=turn))
-        #     print(self.GetData()[5:7])
 
     def SimpleStepRotor(self, speed=1, angle=100) -> int:
         ''' Простой поворот на заданный угол '''
@@ -521,6 +472,11 @@ class MainUI(QMainWindow):
         realrotation = round((line[5] - PHI0/100)%360, 2) # На сколько реально прокрутился ротор
         return realrotation
 
+    def Stop(self) -> None:
+        ''' Остановить оба двигателя ''' 
+        self.StopRotor()
+        self.StopLinear()
+
     def StopRotor(self) -> None:
         ''' Остановить вращение ротора '''
         try:
@@ -547,14 +503,14 @@ class MainUI(QMainWindow):
         GeneratrixScanStepData = pd.Series()
         ZerrAlert = False
         line = self.GetData()
-        print('Z1=', line[3])
         line[3] = round(line[3] - self.ZeroZ)
-        print('Z2=', line[3])
         line[5] = round(line[5] - self.ZeroPhi, 3)%360
         self.data.loc[len(self.data)] = line
         step *= -1 # Меняем знак, потому что ось двигателя и ось энкодера разнонаправлены
         gap = 0
         for s in range(steps):
+            if self.pBtn_ScanGeneratrixStop.isChecked():
+                break
             jump = step + gap # gap - поправка с учётом точности предыдущего шага
             realstep = self.SimpleStepLinear(speed=100, step=jump) # Делаем шаг, вычисляем реальное перемещение в мкм.
             gap = int(step - 2*realstep + gap) # Разница между заданным и искомым перемещением с учётом предыдущей поправки
@@ -572,6 +528,10 @@ class MainUI(QMainWindow):
                 ZerrAlert = True
 
         print('Среднее значение шага по образующей:', GeneratrixScanStepData.mean())
+
+    def ScanThread(self) -> None:
+        self.thread2 = threading.Thread(target=self.Scan)
+        self.thread2.start()
 
     def Scan(self) -> None:
         ''' Сканирование по образующей вниз и вверх от заданных границ '''
@@ -591,10 +551,20 @@ class MainUI(QMainWindow):
         imp_in_degree = 100 # Количество импульсов двигателя на угловой градус
         rotation = round(self.dSpBox_ScanStepAngle.value()*imp_in_degree)
 
-        NumberOfRuns = round(self.dSpBox_Range_PHI.value()/(2*self.dSpBox_ScanStepAngle.value())) # TODO math.ceil Задаём количество шагов по окружности (пополам, потому что вверх-вниз)
+        self.pBtn_ScanGeneratrixStop.setChecked(False)
+        self.pBtn_ScanGeneratrix.setStyleSheet('QPushButton {background-color : green;}')
+
+        message = "Съёмка начата"
+        print(message)
+        self.statusbar.showMessage(message)
+
+        NumberOfRuns = round(self.dSpBox_Range_PHI.value()/(2*self.dSpBox_ScanStepAngle.value())) # Задаём количество шагов по окружности (пополам, потому что вверх-вниз)
         self.rotationgap = 0
         for n in range(NumberOfRuns+1):
             print('Проход номер', n)
+
+            if self.pBtn_ScanGeneratrixStop.isChecked():
+                break
 
             # Выборка люфта снизу
             self.SimpleStepLinear(speed=100, step=-4000)
@@ -615,6 +585,9 @@ class MainUI(QMainWindow):
             
             # Движение вверх
             self.ScanGeneratrix(steps=steps, step=-step)
+
+            if self.pBtn_ScanGeneratrixStop.isChecked():
+                break
 
             # Шаг по окружности
             realrotation = self.PresizeStepRotor(speed=1, angle=(rotation+self.rotationgap))
@@ -646,6 +619,9 @@ class MainUI(QMainWindow):
             # Движение вниз
             self.ScanGeneratrix(steps=steps, step=step)
 
+            if self.pBtn_ScanGeneratrixStop.isChecked():
+                break
+
             # Шаг по окружности
             realrotation = self.PresizeStepRotor(speed=1, angle=(rotation+self.rotationgap))
             self.rotationgap = round(rotation - realrotation*100 + self.rotationgap)
@@ -657,17 +633,26 @@ class MainUI(QMainWindow):
             # print('Нижняя координата', line[3])
             shift = start-line[3]
 
+        self.pBtn_ScanGeneratrixStop.setChecked(False)
+        self.pBtn_ScanGeneratrix.setStyleSheet('QPushButton {background-color : #E1E1E1;}'
+                                               'QPushButton:hover { background-color: #66FF66;}')
+        self.pBtn_ScanGeneratrixStop.setStyleSheet('QPushButton {background-color : #E1E1E1;}'
+                                                   'QPushButton:hover { background-color: salmon;}')
+        
         self.data['Zx'] = self.data['Z'] + 2000
         self.data['Zy'] = self.data['Z']
         self.data['Zz'] = self.data['Z'] - 2000
         self.data = self.data[['Bx', 'By', 'Bz', 'Zx', 'Zy', 'Zz', 'Zerr', 'PHI', 'PHIerr', 'T']]
-        # self.data.reindex(columns=['Bx', 'By', 'Bz', 'Zx', 'Zy', 'Zz', 'Zerr', 'PHI', 'PHIerr', 'T'])
         filename = time.strftime("%Y-%m-%d_%H-%M")
         self.data.to_csv(f"data_{filename}.csv")
         self.LayersSum()
         message = "Съёмка завершена!"
         print(message)
         self.statusbar.showMessage(message)
+
+    def ScanRotorFastThread(self) -> None:
+        self.thread3 = threading.Thread(target=self.ScanRotorFast)
+        self.thread3.start()
 
     def ScanRotorFast(self) -> None:
         ''' Сканирование поверхности ротора в спиральном режиме '''
@@ -683,20 +668,28 @@ class MainUI(QMainWindow):
         line[5] = round(line[5] - self.ZeroPhi, 3)%360
         self.data.loc[len(self.data)] = line
 
+        self.pBtn_ScanRotorSpiralStop.setChecked(False)
+        self.pBtn_ScanRotorSpiral.setStyleSheet('QPushButton {background-color : green;}')
         self.RotateCW(speed=5)
         self.LinearMotionUp(speed=1)
 
         scan = True
         while scan:
             line = self.GetData()
-            print('Z:', line[3])
             if line[3] > finish:
+                scan = False
+            if self.pBtn_ScanRotorSpiralStop.isChecked():
                 scan = False
             line[3] = round(line[3] - self.ZeroZ)
             line[5] = round(line[5] - self.ZeroPhi, 3)%360
             self.data.loc[len(self.data)] = line
-            time.sleep(1)
+            time.sleep(0.05)
 
+        self.pBtn_ScanRotorSpiralStop.setChecked(False)
+        self.pBtn_ScanRotorSpiralStop.setStyleSheet('QPushButton {background-color : #E1E1E1;}'
+                                                    'QPushButton:hover { background-color: salmon;}')
+        self.pBtn_ScanRotorSpiral.setStyleSheet('QPushButton {background-color : #E1E1E1;}'
+                                                'QPushButton:hover { background-color: #66FF66;}')
         self.StopRotor()
         self.StopLinear()
 
@@ -728,7 +721,7 @@ class MainUI(QMainWindow):
                 # Send the command to the DataPort
                 self.serialData.write(command.encode())
                 line = str(self.serialData.readline().strip()).split(';') # Строка вида
-            self.lbl_Data.setText(str(line))
+            # self.lbl_Data.setText(str(line))
             Bx = float(line[0][5:-3].replace(',','.'))
             By = float(line[1][4:-3].replace(',','.'))
             Bz = float(line[2][4:-3].replace(',','.'))
@@ -769,6 +762,7 @@ class MainUI(QMainWindow):
         with open('config.json', 'w') as config_file: 
             json.dump(config_data, config_file)
 
+    # Графический блок
 
     def SetupFieldComponent(self, index: int):
         self.graphWidget.clear()
@@ -858,12 +852,9 @@ class MainUI(QMainWindow):
         self.plotData = self.graphWidget.plot(x = self.x_coord, y = self.y_coord, pen = 'b', symbol = 'h')
 
 if __name__ == '__main__':
-    # from PyQt5.QtWebEngineWidgets import QWebEngineView # IP: нашел рекомендацию этот импорт делать тут
-    # app = QApplication(sys.argv)
     app = QApplication([])
     
     rotor = MainUI()
     rotor.show()
     
-    # app.exec_()
     sys.exit(app.exec_())
