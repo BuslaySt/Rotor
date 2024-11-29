@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>650</width>
-    <height>600</height>
+    <width>735</width>
+    <height>602</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -1385,9 +1385,9 @@ QPushButton:hover { background-color: salmon;}</string>
           <widget class="QPushButton" name="pBtn_Result">
            <property name="geometry">
             <rect>
-             <x>400</x>
+             <x>370</x>
              <y>10</y>
-             <width>201</width>
+             <width>141</width>
              <height>71</height>
             </rect>
            </property>
@@ -1411,9 +1411,9 @@ QPushButton:hover { background-color: salmon;}</string>
           <widget class="QPushButton" name="pBtn_ResultInFrame">
            <property name="geometry">
             <rect>
-             <x>210</x>
+             <x>190</x>
              <y>10</y>
-             <width>181</width>
+             <width>161</width>
              <height>71</height>
             </rect>
            </property>
@@ -1468,6 +1468,19 @@ QPushButton:hover { background-color: salmon;}</string>
            </property>
            <property name="text">
             <string>XXX</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pBtn_SaveImg">
+           <property name="geometry">
+            <rect>
+             <x>530</x>
+             <y>10</y>
+             <width>141</width>
+             <height>71</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Сохранить график</string>
            </property>
           </widget>
          </widget>
