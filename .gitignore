@@ -1,2 +1,5 @@
 
 /venv
+/build
+/executable
+rotor.spec
