@@ -1,13 +1,11 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.uic import loadUi
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-import sys, datetime, time, json
-import minimalmodbus, serial
+# from PyQt5.QtWebEngineWidgets import QWebEngineView
+import sys, datetime, time, json, os
+import minimalmodbus, serial, threading
 import serial.tools.list_ports
 
 import pandas as pd
-import threading
-import os
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go
 import plotly.offline as offline
