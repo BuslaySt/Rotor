@@ -113,6 +113,7 @@ class MainUI(QMainWindow):
     def SetScanHeight(self) -> None:
         ''' Введённая высота ротора записывается как высота области сканирования '''
         self.dSpBox_Range_Z.setValue(float(self.lEd_RotorHght.text().replace(',','.')))
+        self.dSpBox_Range_Z_spiral.setValue(float(self.lEd_RotorHght.text().replace(',','.')))
 
     def SetupScanStepGeneratrix(self, index: int) -> None:
         ''' Выбор шага по образующей '''
@@ -649,7 +650,7 @@ class MainUI(QMainWindow):
         self.data = self.data[['Bx', 'By', 'Bz', 'Zx', 'Zy', 'Zz', 'Zerr', 'PHI', 'PHIerr', 'T']]
         datadir = 'data'
         filename = time.strftime("%Y-%m-%d_%H-%M")
-        os.makedirs(graphDir, exist_ok = True)
+        os.makedirs(datadir, exist_ok = True)
         self.data.to_csv(os.path.join(datadir, f'data_{filename}.csv'))
         self.LayersSum()
         message = 'Съёмка завершена!'
@@ -708,7 +709,7 @@ class MainUI(QMainWindow):
         # self.data.reindex(columns=['Bx', 'By', 'Bz', 'Zx', 'Zy', 'Zz', 'Zerr', 'PHI', 'PHIerr', 'T'])
         datadir = 'data'
         filename = time.strftime('%Y-%m-%d_%H-%M')
-        os.makedirs(graphDir, exist_ok = True)
+        os.makedirs(datadir, exist_ok = True)
         self.data.to_csv(os.path.join(datadir, f'qdata_{filename}.csv'))
         self.LayersSum()
         message = 'Съёмка завершена!'
