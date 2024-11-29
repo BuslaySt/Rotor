@@ -7,7 +7,8 @@ import serial.tools.list_ports
 
 import pandas as pd
 import threading
-
+import os
+import matplotlib.pyplot as plt
 import plotly.graph_objs as go
 import plotly.offline as offline
 
@@ -103,13 +104,14 @@ class MainUI(QMainWindow):
         self.cBox_FieldComponent.addItems(['Bx', 'By', 'Bz'])
         self.cBox_FieldComponent.setCurrentIndex(0)
         self.componentName = 'Bx'
-        self.cBox_FieldComponent.currentIndexChanged.connect(self.SetupFieldComponent)
+        self.cBox_FieldComponent.currentIndexChanged.connect(self.SetFieldComponent)
         self.spBox_LayerNum.valueChanged.connect(lambda: self.graphWidget.clear())
         self.spBox_LayerNum.setRange(1, 410)
 
         self.graphWidget.setBackground('w')
         self.pBtn_Result.clicked.connect(self.ShowGraph)
         self.pBtn_ResultInFrame.clicked.connect(self.PlotData)
+        self.pBtn_SaveImg.clicked.connect(self.SaveImg)
 
     def SetScanHeight(self) -> None:
         ''' Введённая высота ротора записывается как высота области сканирования '''
@@ -764,7 +766,7 @@ class MainUI(QMainWindow):
 
     # Графический блок
 
-    def SetupFieldComponent(self, index: int):
+    def SetFieldComponent(self, index: int):
         self.graphWidget.clear()
         match index:
             case 0:
@@ -775,7 +777,7 @@ class MainUI(QMainWindow):
                 self.componentName = 'Bz'
                       
     def ShowGraph(self):
-        self.setWindowTitle('PyQt Graph')
+        self.setWindowTitle('Вывод результата')
         #self.data = pd.read_csv('qdata_2024-11-28_15-30.csv') #обработка внешнего дф
         self.TrueZ()       
         self.filename = 'graph.html'
@@ -813,6 +815,7 @@ class MainUI(QMainWindow):
         self.TrueZ()
         layersSum = len(self.uniq_Z)
         self.lbl_LayersSum.setText(str(layersSum))
+        self.spBox_LayerNum.setRange(1, layersSum)
         print('Всего слоев', layersSum)
 
     def TrueZ(self):
@@ -850,6 +853,18 @@ class MainUI(QMainWindow):
         self.graphWidget.setXRange(min(self.x_coord), max(self.x_coord))
         self.graphWidget.setYRange(min(self.y_coord), max(self.y_coord))
         self.plotData = self.graphWidget.plot(x = self.x_coord, y = self.y_coord, pen = 'b', symbol = 'h')
+
+    def SaveImg(self):
+        graphDir = 'graph'
+        filename = time.strftime("%Y-%m-%d_%H-%M")
+        os.makedirs(graphDir, exist_ok = True)
+        plt.plot(self.x_coord, self.y_coord, marker = 'o')
+        plt.grid(visible = True, which = 'both', axis = 'both', color = 'grey', linestyle = ':', linewidth = 0.5)
+        plt.xlabel("Угол поворота ротора")
+        plt.ylabel(f"Индукция {self.componentName}")
+        plt.savefig(os.path.join(graphDir, f"{filename}_{self.componentName}_layer_{self.spBox_LayerNum.value()}.jpg"), dpi = 300)
+        plt.close()
+        print('График сохранен успешно')
 
 if __name__ == '__main__':
     app = QApplication([])
