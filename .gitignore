@@ -3,3 +3,7 @@
 /build
 /executable
 rotor.spec
+/dist
+/data
+graph.html
+/graph
