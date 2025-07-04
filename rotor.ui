@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>logo.ico</normaloff>logo.ico</iconset>
+    <normaloff>AMTClogo-M.ico</normaloff></iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="minimumSize">
